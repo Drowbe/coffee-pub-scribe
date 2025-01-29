@@ -4,8 +4,9 @@
   "description": "Enhanced journal and chat card formatting for snippets of narrative.",
   "version": "0.2.0",
   "compatibility": {
-    "minimum": "11",
-    "verified": "12"
+    "minimum": "12",
+    "verified": "12",
+    "maximum": "13"
   },
   "languages": [
     {
@@ -37,6 +38,16 @@
     "requires": [
       {
         "id": "coffee-pub-blacksmith",
+        "type": "module"
+      }
+    ],
+    "recommends": [
+      {
+        "id": "coffee-pub-crier",
+        "type": "module"
+      },
+      {
+        "id": "coffee-pub-bibliosoph",
         "type": "module"
       }
     ]

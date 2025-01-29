@@ -1,6 +1,12 @@
 # Coffee Pub Scribe
 
-Introducing "Coffee Pub Scribe," the latest in the growing suite of Coffee Pub tools, designed to bring the warmth and camaraderie of a storyteller’s coffee pub to your Foundry VTT gaming table. This module transforms the storytelling experience, turning journal entries into beautifully formatted narrative cards that invite players into the heart of your tale without ever leaving the chat window's embrace.
+![Foundry v12](https://img.shields.io/badge/foundry-v12-green)
+![Latest Release](https://img.shields.io/github/v/release/Drowbe/coffee-pub-scribe)
+![MIT License](https://img.shields.io/badge/license-MIT-blue)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Drowbe/coffee-pub-scribe/release.yml)
+![GitHub all releases](https://img.shields.io/github/downloads/Drowbe/coffee-pub-scribe/total)
+
+Introducing "Coffee Pub Scribe," the latest in the growing suite of Coffee Pub tools, designed to bring the warmth and camaraderie of a storyteller's coffee pub to your Foundry VTT gaming table. This module transforms the storytelling experience, turning journal entries into beautifully formatted narrative cards that invite players into the heart of your tale without ever leaving the chat window's embrace.
 
 ## Features of "Coffee Pub Scribe":
 
@@ -9,7 +15,7 @@ Introducing "Coffee Pub Scribe," the latest in the growing suite of Coffee Pub t
 - **Chat Window Integration:** Merge your storytelling seamlessly into the game's chat, maintaining engagement and immersion.
 - **Custom Design Options:** Customize the look of your narrative cards to fit the atmosphere and aesthetic of your campaign's world.
 - **User-friendly Interface:** Intuitive design for quick learning and use, so you can focus more on the story and less on the setup.
-- **Adaptive Text Formatting:** Auto-adjusting content for readability, ensuring that your story’s presentation is always top-notch.
+- **Adaptive Text Formatting:** Auto-adjusting content for readability, ensuring that your story's presentation is always top-notch.
 - **Journal Enhancements:** For GMs, view the formatted player cards directly within your journal entries, linking narration and gameplay together smoothly.
 - **HTML Blockquote Integration:** Utilize simple HTML to elevate your storytelling. Wrap any text in blockquote tags, and Scribe will transform it into a beautifully formatted card, consistent with the Scribe style.
 - **Narration Button:** Send the narration block to the chat window.
