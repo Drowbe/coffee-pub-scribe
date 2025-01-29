@@ -1,0 +1,12 @@
+/* ------------------------------------ */
+/* --- Set the Layout ----------------- */
+/* ------------------------------------ */
+
+
+:root {
+    --intCardMarginTop: 0px;
+    --intCardMarginBottom: 0px;
+    --intCardMarginLeft: 0px;
+    --intCardMarginRight: 0px;
+    --intOffsetMargineTop: 0px;
+ }

@@ -1,0 +1,41 @@
+
+
+
+
+/* Dialogue */
+
+.scribe-dialogue {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .scribe-dialogue .window-content {
+    background: #222121;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .scribe-dialogue .window-header h4.window-title {
+  
+  }
+  .scribe-dialogue .window-header h4.window-title::before {
+        font-family: "Font Awesome 5 Free";
+      font-size: 0.8em;
+      content: "\f24d";
+      color: #ffffff;
+      padding-right: 4px;
+  }
+  
+  .scribe-dialogue-image-wrapper {
+    padding: 0;
+    margin: 0;
+    max-height: 100vh;
+    overflow: auto;
+  }
+  
+  .scribe-dialogue-image {
+    display: block;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }

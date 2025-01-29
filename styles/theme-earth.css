@@ -1,0 +1,58 @@
+/* ------------------------------------ */
+/* --- LOAD COMMON CSS FILES ---------- */
+/* ------------------------------------ */
+
+@import "common.css";
+@import "cards.css";
+@import "journals.css";
+@import "dialogues.css";
+
+/* ------------------------------------ */
+/* --- CARD COLORS -------------------- */
+/* ------------------------------------ */
+
+/* --- Begin CARD COLORS --- */
+.message-content blockquote {
+    color:#3e3b30;
+    background: #faf6e6;
+    /* --- card inner border --- */
+    border-left: 5px solid #aea585;
+    border-right: 5px solid #aea585;
+    border-top: 5px solid #aea585;
+    border-bottom: 5px solid #aea585;
+    /* --- card outline --- */
+	box-shadow: 0 0 2 0px #000000;
+	
+}
+/* Narrative Title */
+.message-content blockquote h4 {
+    color: #faf6e6;
+    /* --- bacground of the title - diff than inner border --- */
+	background: #49442D;
+    /* --- these should match card inner border --- */
+	border-top: 0px solid #aea585;
+    border-bottom: 0px solid #aea585;
+	/* box-shadow: 0 0 1 3px #aea585; */
+}
+
+/* ------------------------------------ */
+/* --- BUTTONS ------------------------ */
+/* ------------------------------------ */
+
+.scribe-cards-illustration-button {
+    background-color: #0e0c0c;
+    color: #ffffff;
+    border: 1px solid #4b4b4b;
+}
+.scribe-cards-illustration-button:hover {
+    background-color: #000000;
+    color: #AEADAD;
+    border: 1px solid #767676;
+    box-shadow: none;
+}
+
+/* ------------------------------------ */
+/* --- JOURNAL COLORS ----------------- */
+/* ------------------------------------ */
+
+/* None for now */

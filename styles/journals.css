@@ -1,0 +1,423 @@
+
+
+/* ------------------------------------ */
+/* --- JOURNAL LAYOUT ----------------- */
+/* ------------------------------------ */
+
+/* Right now this is shared by all themes */
+
+/* Narrative Box - Ovverides the BlockQuote */
+.journal-page-content blockquote {
+    width: 98%;
+
+	font-size: 1.0em;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 0px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 1.0em;
+    font-style: normal;
+    border-radius: 8px;
+	box-shadow: 0px 0px 7px 1px #000000;
+}
+
+/* Narrative Title Fonts */
+.journal-page-content blockquote h4, blockquote h5{
+    text-transform: uppercase;
+}
+
+/* Narrative Title */
+.journal-page-content blockquote h4 {
+    font-weight:550;
+    font-size: 1.4em;
+    margin-top: 0px;
+    margin-bottom: 15px;
+    margin-left: -10px;
+    margin-right: -10px;
+	padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 14px;
+    padding-right: 14px;
+	border-radius: 3px 3px 0px 0px;
+}
+
+/* Narrative Title Icon */
+.journal-page-content blockquote h4::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f02e";
+    font-size: 0.85em;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 8px;
+}
+
+
+/* Object or image Title */
+.journal-page-content blockquote h5 {
+    font-weight: 600;
+    font-size: 1.1em;
+    font-style: normal;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 4px;
+    border-radius: 0px;
+}
+
+/* Narrative Content */
+.journal-page-content blockquote p {
+	display: block;
+}
+/* Narrative Illustration or Image */
+.journal-page-content blockquote img {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    font-size: 1.0em;
+    font-style: normal;
+    border-radius: 10px;
+    margin: auto;
+    display: block;
+}
+/* Nsimple horizontal rule */
+.journal-page-content blockquote hr {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+/* Narrative Chat Quote */
+.journal-page-content blockquote h6 {
+    font-weight: 400;
+    font-size: 1.0em;
+    font-style: normal;
+    margin-top: 8px;
+    margin-bottom: 10px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 0px;
+}
+/* Narrative Chat Dialogue */
+.journal-page-content blockquote h6 strong {
+    font-weight: 400;
+    font-size: 1.0em;
+    font-style: normal;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 4px;
+    border-radius: 0px;
+}
+.journal-page-content blockquote h6 strong::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f086";
+    font-size: 0.9em;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 6px;
+}
+.journal-page-content blockquote h6 strong::after {
+    content: "\2022";
+    font-weight:400;
+    font-size: 1.1em;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 6px;
+    padding-right: 0px;
+}
+/* Narrative Chat Inner Voice */
+.journal-page-content blockquote h6 em {
+    font-weight: 400;
+    font-size: 1.0em;
+    font-style: normal;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 4px;
+    border-radius: 0px;
+}
+.journal-page-content blockquote h6 em::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: "\f4ad";
+    font-size: 0.9em;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 6px;
+}
+.journal-page-content blockquote h6 em::after {
+    content: "\2022";
+    font-weight:400;
+    font-size: 1.1em;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 6px;
+    padding-right: 0px;
+}
+
+
+/* ------------------------------------ */
+/* --- JOURNAL COLORS ----------------- */
+/* ------------------------------------ */
+
+
+
+/* Narrative Box - Ovverides the BlockQuote */
+.journal-page-content blockquote {
+    color:#3e3b30;
+    background: #faf6e6;
+    /* --- card inner border --- */
+    border-left: 6px solid #aea585;
+    border-right: 6px solid #aea585;
+    border-top: 6px solid #aea585;
+    border-bottom: 6px solid #aea585;
+
+}
+/* Narrative Title Fonts */
+.journal-page-content blockquote h4, blockquote h5{
+    color: inherit;
+}
+/* Narrative Title */
+.journal-page-content blockquote h4 {
+    color: #faf6e6;
+    /* --- background of the title - diff than inner border --- */
+	background: #49442D;
+    /* --- these should match card inner border --- */
+	border-top: 0px solid #aea585;
+    border-bottom: 0px solid #aea585;
+
+}
+/* Narrative Chat Quote separation Dots */
+.journal-page-content blockquote h4::before {
+    color: #faf6e6;
+}
+/* Narrative Content */
+.journal-page-content blockquote p {
+    color: inherit;
+}
+/* Narrative Illustration or Image */
+.journal-page-content blockquote img {
+    background: #aea585;
+    background-image: url(../images/tile-clothdark.webp);
+    border-left: 1px solid #49442D80;
+    border-right: 1px solid #49442D80;
+    border-top: 1px solid #49442D80;
+    border-bottom: 1px solid #49442D80;
+}
+/* Nsimple horizontal rule */
+.journal-page-content blockquote hr {
+    border-left: 0px solid #aea585;
+    border-right: 0px solid #aea585;
+    border-top: 0px solid #aea585;
+    border-bottom: 1px dotted #aea585;
+}
+/* Object or image Title */
+.journal-page-content blockquote h5 {
+    color: #3e3b30;
+    border-left: 0px dotted #aea585;
+    border-right: 0px dotted #aea585;
+    border-top: 0px dotted #aea585;
+    border-bottom: 1px dotted #aea585;
+}
+/* Narrative Chat Quote */
+.journal-page-content blockquote h6 {
+    color: #3e3b30;
+    border-left: 0px solid #aea585;
+    border-right: 0px dotted #aea585;
+    border-top: 1px dotted #c1b99a;
+    border-bottom: 1px dotted #c1b99a;
+}
+/* Narrative Chat Dialogue */
+.journal-page-content blockquote h6 strong {
+    color: #aea585;
+    border-left: 0px dotted #aea585;
+    border-right: 0px dotted #aea585;
+    border-top: 0px dotted #aea585;
+    border-bottom: 0px dotted #aea585;
+}
+.journal-page-content blockquote h6 strong::before {
+    color: #aea585;
+}
+.journal-page-content blockquote h6 strong::after {
+    color: #aea585;
+}
+/* Narrative Chat Inner Voice */
+.journal-page-content blockquote h6 em {
+    color: #aea585;
+    border-left: 0px dotted #aea585;
+    border-right: 0px dotted #aea585;
+    border-top: 0px dotted #aea585;
+    border-bottom: 0px dotted #aea585;
+}
+.journal-page-content blockquote h6 em::before {
+    color: #aea585;
+}
+.journal-page-content blockquote h6 em::after {
+    color: #aea585;
+}
+
+
+
+
+
+
+
+/* button holder */
+.scribe-journal-buttons-wrapper {
+	width: 100%;
+	margin: 0 auto;
+	display: block;
+	
+	background: #C9C4AF;
+	border-top: 1px solid #BEB9A6;
+	border-bottom: 1px solid #BEB9A6;
+	border-left: 1px solid #BEB9A6;
+	border-right: 1px solid #BEB9A6;
+	
+	margin-top: 10px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+	padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 2px;
+    padding-right: 2px;
+	border-radius: 3px 3px 3px 3px;
+	text-align: right;
+	
+}
+.scribe-journal-buttons-container {
+	width: auto;
+	margin: 0 auto;
+	display: inline;
+}
+
+/* Button: Standard Button */
+.scribe-journal-copy-button-normal,
+.scribe-journal-export-button-normal,
+.scribe-journal-save-button-normal,
+.scribe-journal-illustration-button-normal,
+.scribe-journal-narration-button-normal {
+    line-height: normal;
+    padding-top: 4px;
+	padding-bottom: 4px;
+	padding-left: 6px;
+	padding-right: 6px;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	margin-left: 5px;
+	margin-right: 5px;
+    font-size: 0.9em;
+    border-radius: 4px;
+	text-transform: uppercase;
+    text-align: center;
+	width: auto;
+}
+.scribe-journal-save-button-normal::after,
+.scribe-journal-illustration-button-normal::after,
+.scribe-journal-narration-button-normal::after,
+.scribe-journal-export-button-normal::after,
+.scribe-journal-copy-button-normal::after {
+    text-transform: uppercase;
+}
+.scribe-journal-copy-button-normal i,
+.scribe-journal-export-button-normal i,
+.scribe-journal-save-button-normal i,
+.scribe-journal-illustration-button-normal i,
+.scribe-journal-narration-button-normal i {
+	padding-left: 2px;
+    padding-top: 2px;
+    font-size: 1.0em;
+}
+/* Button: Standard Button */
+.scribe-journal-copy-button-normal,
+.scribe-journal-export-button-normal,
+.scribe-journal-save-button-normal,
+.scribe-journal-illustration-button-normal,
+.scribe-journal-narration-button-normal {
+    background-color: #312E20;
+    color: #ffffff;
+    border: 1px solid #625D45;
+}
+.scribe-journal-copy-button-normal:hover,
+.scribe-journal-export-button-normal:hover,
+.scribe-journal-save-button-normal:hover,
+.scribe-journal-illustration-button-normal:hover,
+.scribe-journal-narration-button-normal:hover {
+    background-color: #EBD04A;
+    color: #312E20;
+    border: 1px solid #AB993C;
+    box-shadow: 0 0 0 1.8px rgba(171, 153, 60, 0.4);
+}
+
+
+/* NOT SURE THESE ARE USED */
+/* Button: Small Round Pill Button */
+.scribe-journal-narration-button-round {
+    flex: 0 1 0;
+	content: "";
+    padding: 2px;
+    font-size: 28px;
+    position: absolute;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    bottom: 20px;
+}
+/* Button: Small Round Pill Button */
+.scribe-journal-narration-button-round {
+    background-color: var(--color-text-light-0);
+    color: rgba(0, 170, 0, 0.8);
+}

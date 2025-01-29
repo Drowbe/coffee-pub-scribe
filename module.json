@@ -1,0 +1,44 @@
+{
+  "id": "coffee-pub-scribe",
+  "title": "Coffee Pub Scribe",
+  "description": "Enhanced journal and chat card formatting for snippets of narrative.",
+  "version": "0.2.0",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "12"
+  },
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json",
+      "flags": {}
+    }
+  ],
+  "authors": [
+    {
+      "name": "drowbe"
+    },
+    {
+      "name": "CLIFFFF"
+    }
+  ],
+  "esmodules": [
+    "scripts/scribe.js"
+  ],
+  "styles": [
+    "styles/theme-dark.css"
+  ],
+  "manifest": "module.json",
+  "changelog": "CHANGELOG.md",
+  "license": "LICENSE",
+  "readme": "README.md",
+  "relationships": {
+    "requires": [
+      {
+        "id": "coffee-pub-blacksmith",
+        "type": "module"
+      }
+    ]
+  }
+}

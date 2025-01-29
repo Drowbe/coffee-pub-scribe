@@ -1,0 +1,51 @@
+{
+	"coffee-pub-scribe": {
+
+		"headingH1Scribe-Label": "Introduction",
+		"headingH1Scribe-Hint": "Scribe is a versatile tool that turns narrative descriptions into visually appealing cards, perfect for enhancing storytelling in any campaign. With customizable styles and an easy handout feature, players can easily immerse themselves in the world and stay engaged with important details. Elevate your game with Scribe and bring your story to life.",
+		
+		"headingH2Theme-Label": "Theme",
+		"headingH2Theme-Hint": "You can send narrative cards from the journal to the chat window. Choose the card that best aligns with your narrative.",
+
+		"cardTheme-Label": "Card Style",
+		"cardTheme-Hint": "The color and aesthetics that should be used for the card. Default: Dark and Stormy",
+
+
+
+		"toolbarEnabled-Label": "Toolbar Enabled",
+		"toolbarEnabled-Hint": "Show the Scribe toolbar in narration blocks in the journal. Default: Enabled.",
+
+		"toolbarButtonLabelEnabled-Label": "Show Button Labels",
+		"toolbarButtonLabelEnabled-Hint": "Show button labels. Default: Enabled.",
+
+		"headingH2Toolbar-Label": "Journal Toolbar",
+		"headingH2Toolbar-Hint": "Scribe will add a toolbar to its stylized block quotes. Identify the buttons you want on the toolbar. Default: Enabled.",
+
+		"toolbarButtonNarration-Label": "Narration Button",
+		"toolbarButtonNarration-Hint": "Show the narration button in the toolbar. (Requires the toolbar is enabled) Default: Enabled.",
+
+		"toolbarButtonIllustration-Label": "Illustration Button",
+		"toolbarButtonIllustration-Hint": "Show the illustration button in the toolbar. (Requires the toolbar is enabled) Default: Enabled.",
+
+		"toolbarButtonHandout-Label": "Handout Button",
+		"toolbarButtonHandout-Hint": "Show the handout button in the toolbar. (Requires the toolbar is enabled) Default: Enabled.",
+
+		"toolbarButtonCopy-Label": "Copy Button",
+		"toolbarButtonCopy-Hint": "Show the copy button in the toolbar. (Requires the toolbar is enabled) Default: Enabled.",
+
+		"toolbarButtonExport-Label": "Export Button",
+		"toolbarButtonExport-Hint": "Show the save button in the toolbar. (Requires the toolbar is enabled) Default: Enabled.",
+
+		
+
+
+		"headingH2Handouts-Label": "Handouts",
+		"headingH2Handouts-Hint": "Copy narrative cards from the journal to a folder that the party can view later.",
+
+		"handoutFolder-Label": "Folder",
+		"handoutFolder-Hint": "The name of the folder in which you want to stare any handouts you share with the party. Default: Party Handouts",
+	
+		"folderColor-Label": "Folder Color",
+		"folderColor-Hint": "The hex value for the folder color. Default: #77274e"
+	}
+}
