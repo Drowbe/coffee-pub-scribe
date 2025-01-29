@@ -8,6 +8,30 @@
 
 Introducing "Coffee Pub Scribe," the latest in the growing suite of Coffee Pub tools, designed to bring the warmth and camaraderie of a storyteller's coffee pub to your Foundry VTT gaming table. This module transforms the storytelling experience, turning journal entries into beautifully formatted narrative cards that invite players into the heart of your tale without ever leaving the chat window's embrace.
 
+## Installation
+
+### Method 1: Foundry VTT Interface
+1. In Foundry VTT, navigate to the "Add-on Modules" tab
+2. Click "Install Module"
+3. Search for "Coffee Pub Scribe"
+4. Click "Install"
+
+### Method 2: Manual Installation
+1. In Foundry VTT's "Add-on Modules" tab, click "Install Module"
+2. Paste the following manifest URL:
+   ```
+   https://github.com/Drowbe/coffee-pub-scribe/releases/latest/download/module.json
+   ```
+3. Click "Install"
+
+### Required Dependencies
+- [Coffee Pub Blacksmith](https://github.com/Drowbe/coffee-pub-blacksmith) - Will be automatically installed if using the Foundry VTT interface
+
+### After Installation
+1. Enable the module in your World's Module Settings
+2. If you haven't already, enable Coffee Pub Blacksmith
+3. Configure any desired settings in the module settings panel
+
 ## Features of "Coffee Pub Scribe":
 
 - **Part of Coffee Pub Tools:** Scribe joins a family of tools aimed at enriching your gaming experience with the charm of a coffee pub meet-up.
