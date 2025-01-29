@@ -1,22 +1,43 @@
-# Change Log
+# Changelog
 
-## 0.2.0
+All notable changes to this project will be documented in this file.
 
-- Added journal toolbars
-- Added functionailty to send a journal image to the chat.
-- Added functionaility to send journal narration to the chat.
-- Users can now click an image sent to chat to view it.
-- Added handouts functionality for narration.
+## [0.2.0] - 2024-03-19
 
-## 0.1.2
+### Added
+- Journal toolbars for enhanced interaction
+- Send journal images to chat functionality
+- Send journal narration to chat functionality
+- Clickable chat images for larger view
+- Handouts functionality for narration blocks
+- GitHub Actions automated release workflow
+- Proper module dependencies and recommendations
+- Complete module manifest URLs for Foundry VTT compatibility
 
+### Changed
+- Updated module compatibility for Foundry VTT v12-13
+- Improved documentation and README structure
+- Enhanced module relationships with other Coffee Pub modules
+
+## [0.1.2] - 2024
+
+### Changed
 - Renamed module from "Journals" to "Scribe"
-- Introduced settings for cards
-- Introduced margin controls for fine-tuning card alignment in chat
-- unified card themes
+- Unified card themes for consistent appearance
 
-## 0.1.1
+### Added
+- Settings panel for card customization
+- Margin controls for fine-tuning card alignment in chat
 
-- basic styling
+## [0.1.1] - 2024
 
-## 0.1.0 Initial
+### Added
+- Basic styling implementation
+- Initial card formatting
+
+## [0.1.0] - 2024
+
+### Added
+- Initial release
+- Basic module structure
+- Core functionality framework
