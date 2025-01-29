@@ -30,7 +30,9 @@
   "styles": [
     "styles/theme-dark.css"
   ],
-  "manifest": "module.json",
+  "manifest": "https://github.com/Drowbe/coffee-pub-scribe/releases/latest/download/module.json",
+  "download": "https://github.com/Drowbe/coffee-pub-scribe/releases/latest/download/module.zip",
+  "url": "https://github.com/Drowbe/coffee-pub-scribe",
   "changelog": "CHANGELOG.md",
   "license": "LICENSE",
   "readme": "README.md",
@@ -38,17 +40,20 @@
     "requires": [
       {
         "id": "coffee-pub-blacksmith",
-        "type": "module"
+        "type": "module",
+        "manifest": "https://github.com/Drowbe/coffee-pub-blacksmith/releases/latest/download/module.json"
       }
     ],
     "recommends": [
       {
         "id": "coffee-pub-crier",
-        "type": "module"
+        "type": "module",
+        "manifest": "https://github.com/Drowbe/coffee-pub-crier/releases/latest/download/module.json"
       },
       {
         "id": "coffee-pub-bibliosoph",
-        "type": "module"
+        "type": "module",
+        "manifest": "https://github.com/Drowbe/coffee-pub-bibliosoph/releases/latest/download/module.json"
       }
     ]
   }

@@ -24,7 +24,16 @@ Introducing "Coffee Pub Scribe," the latest in the growing suite of Coffee Pub t
 
 Welcome "Coffee Pub Scribe" into your sessions, and let it infuse your campaign with the narrative depth and interactive storytelling reminiscent of a cozy evening at your local coffee pub.
 
-## Narration  Format
+## Dependencies and Recommendations
+
+### Required Modules
+- [Coffee Pub Blacksmith](https://github.com/Drowbe/coffee-pub-blacksmith) - Core framework for the Coffee Pub suite of modules
+
+### Recommended Modules
+- [Coffee Pub Crier](https://github.com/Drowbe/coffee-pub-crier) - Enhanced chat features for your storytelling needs
+- [Coffee Pub Bibliosoph](https://github.com/Drowbe/coffee-pub-bibliosoph) - Advanced journal management and organization
+
+## Narration Format
 
 To build a nicely formatted card, all you need to do is leverage the markup built right into foundry. Insideo fa normal hournal entry, anything you put within a "blockquote" tag will be formatted as a Scribe narration card. This DOES MEAN that if you plan to use blockquote for other reason, any of the content you put into it will be formatted as a Scribe Narration block.
 
