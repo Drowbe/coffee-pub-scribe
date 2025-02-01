@@ -1,4 +1,4 @@
-# Coffee Pub Scribe - ROADMAP
+# Coffee Pub scribe - ROADMAP
 
 <!--
 USAGE:
@@ -28,12 +28,12 @@ P4 - Low Priority/Low Impact
 - Allow icon configuration? [Priority: P2] [Label: scribe, enhancement]
 - Introduce JOURNAL styles [Priority: P2] [Label: scribe, styling]
 - Allow sub-element style formatting (e.g. conversations) [Priority: P3] [Label: scribe, styling]
-- Tools for inserting a narrative template into a journal? [Priority: P3] [Label: scribe, feature]
 
 ## IN PROGRESS
 
 - Tweak journal look and feel for inside journals [Priority: P2] [Label: scribe, UX]
 - Hook scribe into Blacksmith API [Priority: P2] [Label: scribe, api]
+- Tools for inserting a narrative template into a journal? [Priority: P3] [Label: scribe, feature]
 - Nail down theme names [Priority: P3] [Label: scribe, design]
 
 ## TESTING
