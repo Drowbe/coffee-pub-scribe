@@ -152,6 +152,29 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
         event.stopPropagation();
         openJournalForPrinting(journalSheet.object);
     });
+
+    // Number top-level navigation items in the journal sidebar
+    const navList = html.find('.journal-sidebar .directory-list, .journal-sidebar ol.directory-list');
+    if (navList.length > 0) {
+        // Find all top-level items (not children)
+        let topLevelItems = navList.children('li.directory-item, li.page, li.journal-entry-page');
+        let number = 1;
+        topLevelItems.each(function() {
+            const $item = $(this);
+            // Only number items that are not already numbered
+            if ($item.find('.scribe-nav-number').length === 0) {
+                // Prepend the number
+                const label = $item.children('.entry-name, .page-title, .name').first();
+                if (label.length > 0) {
+                    label.prepend(`<span class="scribe-nav-number" style="font-weight:bold; margin-right:6px;">${number}.</span>`);
+                } else {
+                    // Fallback: prepend to the item itself
+                    $item.prepend(`<span class="scribe-nav-number" style="font-weight:bold; margin-right:6px;">${number}.</span>`);
+                }
+                number++;
+            }
+        });
+    }
 });
 
 // ================================================================== 
@@ -614,7 +637,7 @@ function openJournalForPrinting(journalEntry) {
     });
     
     // Create the complete HTML document
-    const htmlContent = `
+    let htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -679,7 +702,21 @@ function openJournalForPrinting(journalEntry) {
         </body>
         </html>
     `;
-    
+
+    // --- Number the first h2 in each .journal-page, starting from 0 ---
+    const tempDoc = document.implementation.createHTMLDocument('');
+    tempDoc.documentElement.innerHTML = htmlContent;
+    const pageDivs = tempDoc.querySelectorAll('.journal-page');
+    let pageNum = 0;
+    pageDivs.forEach(pageDiv => {
+        const firstH2 = pageDiv.querySelector('h2');
+        if (firstH2) {
+            firstH2.innerHTML = `<span style='font-weight:bold; margin-right:8px;'>${pageNum}.</span> ` + firstH2.innerHTML;
+            pageNum++;
+        }
+    });
+    htmlContent = tempDoc.documentElement.outerHTML;
+
     // Open in new window/tab
     const newWindow = window.open('', '_blank');
     newWindow.document.write(htmlContent);
