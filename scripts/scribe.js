@@ -145,11 +145,11 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
     if (windowHeader.find('.scribe-journal-export-button').length > 0) return;
     
     // Create the export button as an <a> tag
-    const exportButton = $(`
-        <a class="header-button control scribe-journal-export-button" title="Export Journal" data-journal-id="${journalSheet.object.id}">
+    const exportButton = $(
+        `<a class="header-button control scribe-journal-export-button" href="#" title="Export Journal" data-journal-id="${journalSheet.object.id}">
             <i class="fas fa-cloud-arrow-down"></i> Export
-        </a>
-    `);
+        </a>`
+    );
     
     // Add the button to the window header (before the close button)
     const closeButton = windowHeader.find('.close');
@@ -633,58 +633,7 @@ function openJournalForPrinting(journalEntry) {
         <head>
             <title>${journalEntry.name} - Print View</title>
             <meta charset="utf-8">
-            <style>
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    line-height: 1.6;
-                    margin: 20px;
-                    background: white;
-                    color: #333;
-                }
-                .journal-page {
-                    margin-bottom: 30px;
-                }
-                .journal-page h2 {
-                    color: #2c3e50;
-                    border-bottom: 2px solid #3498db;
-                    padding-bottom: 10px;
-                    margin-bottom: 20px;
-                }
-                .page-content {
-                    margin-left: 20px;
-                }
-                blockquote {
-                    background: #f8f9fa;
-                    border-left: 4px solid #3498db;
-                    margin: 15px 0;
-                    padding: 15px;
-                    border-radius: 4px;
-                }
-                blockquote h4 {
-                    color: #2c3e50;
-                    margin-top: 0;
-                    margin-bottom: 15px;
-                    font-size: 1.2em;
-                }
-                img {
-                    max-width: 100%;
-                    height: auto;
-                    border-radius: 8px;
-                    margin: 10px 0;
-                }
-                @media print {
-                    body {
-                        margin: 0;
-                        padding: 15px;
-                    }
-                    .journal-page {
-                        page-break-inside: avoid;
-                    }
-                    .page-content {
-                        margin-left: 0;
-                    }
-                }
-            </style>
+            <link rel="stylesheet" href="modules/coffee-pub-scribe/styles/export.css">
         </head>
         <body>
             <h1>${journalEntry.name}</h1>
@@ -701,7 +650,8 @@ function openJournalForPrinting(journalEntry) {
     pageDivs.forEach(pageDiv => {
         const firstH2 = pageDiv.querySelector('h2');
         if (firstH2) {
-            firstH2.innerHTML = `<span style='font-weight:bold; margin-right:8px;'>${pageNum}.</span> ` + firstH2.innerHTML;
+            firstH2.classList.add('scribe-export-title');
+            firstH2.innerHTML = `<span class='scribe-export-number'>${pageNum}.</span> ` + firstH2.innerHTML;
             pageNum++;
         }
     });
