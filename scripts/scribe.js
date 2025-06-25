@@ -113,6 +113,47 @@ Hooks.on("renderJournalPageSheet", (journalPageSheet, html, data) => {
     window.exportNarrationToHTML = exportNarrationToHTML;
 });
 
+// ************************************
+// ** HOOK: JOURNAL TITLEBAR EXPORT BUTTON
+// ************************************
+Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
+    // Check if the export button is enabled
+    const exportButtonEnabled = game.settings.get(MODULE_ID, 'toolbarButtonPrint');
+    if (!exportButtonEnabled) return;
+    
+    // Check if the user is a GM
+    if (!game.user.hasRole("GAMEMASTER")) return;
+    
+    // Find the window header
+    const windowHeader = html.find('.window-header');
+    if (windowHeader.length === 0) return;
+    
+    // Check if the export button already exists
+    if (windowHeader.find('.scribe-journal-export-button').length > 0) return;
+    
+    // Create the export button as an <a> tag
+    const exportButton = $(`
+        <a class="header-button control scribe-journal-export-button" title="Export Journal" data-journal-id="${journalSheet.object.id}">
+            <i class="fas fa-cloud-arrow-down"></i> Export
+        </a>
+    `);
+    
+    // Add the button to the window header (before the close button)
+    const closeButton = windowHeader.find('.close');
+    if (closeButton.length > 0) {
+        closeButton.before(exportButton);
+    } else {
+        windowHeader.append(exportButton);
+    }
+    
+    // Add click event listener
+    exportButton.click((event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        openJournalForPrinting(journalSheet.object);
+    });
+});
+
 // ================================================================== 
 // ===== FUNCTIONS ==================================================
 // ================================================================== 
@@ -530,4 +571,122 @@ function changeCSS(cssFile) {
     } else {
         // Do nothing
     }
+}
+
+// ************************************
+// ** JOURNAL PRINT: OPEN FOR PRINTING
+// ************************************
+function openJournalForPrinting(journalEntry) {
+    // Get all pages from the journal
+    const pages = journalEntry.pages.contents;
+    if (!pages || pages.length === 0) {
+        ui.notifications.warn("This journal has no content to print.");
+        return;
+    }
+    
+    // Create HTML content for all pages
+    let fullContent = '';
+    let pageNumber = 1;
+    
+    pages.forEach(page => {
+        if (page.type === 'text' && page.text && page.text.content) {
+            // Clone the content to avoid modifying the original
+            let pageContent = page.text.content;
+            
+            // Remove any existing Scribe toolbars from the content
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = pageContent;
+            const toolbars = tempDiv.querySelectorAll('.scribe-journal-buttons-wrapper');
+            toolbars.forEach(toolbar => toolbar.remove());
+            pageContent = tempDiv.innerHTML;
+            
+            // Add page header
+            fullContent += `
+                <div class="journal-page" style="page-break-after: always;">
+                    <h2>${page.name}</h2>
+                    <div class="page-content">
+                        ${pageContent}
+                    </div>
+                </div>
+            `;
+            pageNumber++;
+        }
+    });
+    
+    // Create the complete HTML document
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${journalEntry.name} - Print View</title>
+            <meta charset="utf-8">
+            <style>
+                body {
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    line-height: 1.6;
+                    margin: 20px;
+                    background: white;
+                    color: #333;
+                }
+                .journal-page {
+                    margin-bottom: 30px;
+                }
+                .journal-page h2 {
+                    color: #2c3e50;
+                    border-bottom: 2px solid #3498db;
+                    padding-bottom: 10px;
+                    margin-bottom: 20px;
+                }
+                .page-content {
+                    margin-left: 20px;
+                }
+                blockquote {
+                    background: #f8f9fa;
+                    border-left: 4px solid #3498db;
+                    margin: 15px 0;
+                    padding: 15px;
+                    border-radius: 4px;
+                }
+                blockquote h4 {
+                    color: #2c3e50;
+                    margin-top: 0;
+                    margin-bottom: 15px;
+                    font-size: 1.2em;
+                }
+                img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                    margin: 10px 0;
+                }
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 15px;
+                    }
+                    .journal-page {
+                        page-break-inside: avoid;
+                    }
+                    .page-content {
+                        margin-left: 0;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <h1>${journalEntry.name}</h1>
+            ${fullContent}
+        </body>
+        </html>
+    `;
+    
+    // Open in new window/tab
+    const newWindow = window.open('', '_blank');
+    newWindow.document.write(htmlContent);
+    newWindow.document.close();
+    
+    // Play sound effect
+    playSound("modules/coffee-pub-blacksmith/sounds/book-open-02.mp3");
+    
+    ui.notifications.info(`Journal "${journalEntry.name}" opened for printing in a new tab.`);
 }

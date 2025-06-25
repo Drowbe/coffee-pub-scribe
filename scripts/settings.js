@@ -162,15 +162,16 @@ export const registerSettings = () => {
 	default: true,
 	});
 
-
-
-
-
-
-
-
-
-
+	// -- PRINT BUTTON --
+	game.settings.register(MODULE_ID, 'toolbarButtonPrint', {
+		name: MODULE_ID + '.toolbarButtonPrint-Label',
+		hint: MODULE_ID + '.toolbarButtonPrint-Hint',
+		type: Boolean,
+		config: true,
+		requiresReload: false,
+		scope: 'world',
+		default: true,
+	});
 
 	// ----------  HANDOUTS ----------
 	game.settings.register(MODULE_ID, "headingH2Handouts", {

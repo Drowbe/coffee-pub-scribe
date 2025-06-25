@@ -1,5 +1,3 @@
-
-
 /* ------------------------------------ */
 /* --- JOURNAL LAYOUT ----------------- */
 /* ------------------------------------ */
@@ -420,4 +418,61 @@
 .scribe-journal-narration-button-round {
     background-color: var(--color-text-light-0);
     color: rgba(0, 170, 0, 0.8);
+}
+
+/* ------------------------------------ */
+/* --- JOURNAL TITLEBAR PRINT BUTTON -- */
+/* ------------------------------------ */
+
+.scribe-journal-print-button {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 4px 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.scribe-journal-print-button:hover {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.scribe-journal-print-button i {
+    font-size: 14px;
+}
+
+/* --- JOURNAL TITLEBAR EXPORT BUTTON -- */
+.scribe-journal-export-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0 8px;
+    margin: 0 2px;
+    border-radius: 3px;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+.scribe-journal-export-button:hover {
+    background: rgba(0,0,0,0.1);
+    color: var(--color-text-hyperlink, #3498db);
+    text-decoration: none;
+}
+.scribe-journal-export-button i {
+    font-size: 1em;
+    margin-right: 4px;
 }

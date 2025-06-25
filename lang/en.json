@@ -36,6 +36,9 @@
 		"toolbarButtonExport-Label": "Export Button",
 		"toolbarButtonExport-Hint": "Show the save button in the toolbar. (Requires the toolbar is enabled) Default: Enabled.",
 
+		"toolbarButtonPrint-Label": "Print Button",
+		"toolbarButtonPrint-Hint": "Show the print button in the journal titlebar. (GM only) Default: Enabled.",
+
 		
 
 
