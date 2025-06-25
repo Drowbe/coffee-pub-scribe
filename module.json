@@ -2,7 +2,7 @@
   "id": "coffee-pub-scribe",
   "title": "Coffee Pub Scribe",
   "description": "Enhanced journal and chat card formatting for snippets of narrative.",
-  "version": "0.2.0",
+  "version": "1.12.1",
   "compatibility": {
     "minimum": "12",
     "verified": "12",

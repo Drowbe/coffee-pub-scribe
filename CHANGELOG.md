@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.1] - Journal Export
+
+### Added
+- Export button added to the journal titlebar, styled to match other header controls, labeled "Export" with an export icon (fa-cloud-arrow-down).
+- Exported journals open in a new browser tab as clean, print-optimized HTML.
+- Each exported journal page is styled for clarity and print-friendliness, including page breaks and responsive design.
+- Top-level section numbers are automatically prepended to the first <h2> of each exported journal page, starting from 0, to match map and navigation correlation.
+- Export/print removes Scribe toolbars and extraneous UI for a clean output.
+
+### Changed
+- Improved UI integration for export functionality in the journal window.
+- CSS for export button and print/export output refined for consistency and usability.
+
+### Fixed
+- Exported journal numbering now matches the order and structure of the in-app navigation and map references.
+
 ## [0.2.0] - 2024-03-19
 
 ### Added

@@ -80,7 +80,20 @@ Hooks.on("renderJournalPageSheet", (journalPageSheet, html, data) => {
     
     // Check if we're in edit mode - don't add toolbar if editing
     const isEditMode = html.find('.editor').length > 0;
-    if (isEditMode) return;
+    if (isEditMode) {
+        // Add double-click handler to images in the editor
+        const editor = html.find('.editor');
+        editor.on('dblclick', 'img', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            // Find the Insert Image button in the same sheet
+            const insertImageButton = html.find('button[data-action="image"]:visible').first();
+            if (insertImageButton.length) {
+                insertImageButton[0].click();
+            }
+        });
+        return;
+    }
 
     // If the user is a GM, process the blockquotes and add the toolbar
     if (game.user.hasRole("GAMEMASTER")) {
