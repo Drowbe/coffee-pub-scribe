@@ -165,29 +165,6 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
         event.stopPropagation();
         openJournalForPrinting(journalSheet.object);
     });
-
-    // Number top-level navigation items in the journal sidebar
-    const navList = html.find('.journal-sidebar .directory-list, .journal-sidebar ol.directory-list');
-    if (navList.length > 0) {
-        // Find all top-level items (not children)
-        let topLevelItems = navList.children('li.directory-item, li.page, li.journal-entry-page');
-        let number = 1;
-        topLevelItems.each(function() {
-            const $item = $(this);
-            // Only number items that are not already numbered
-            if ($item.find('.scribe-nav-number').length === 0) {
-                // Prepend the number
-                const label = $item.children('.entry-name, .page-title, .name').first();
-                if (label.length > 0) {
-                    label.prepend(`<span class="scribe-nav-number" style="font-weight:bold; margin-right:6px;">${number}.</span>`);
-                } else {
-                    // Fallback: prepend to the item itself
-                    $item.prepend(`<span class="scribe-nav-number" style="font-weight:bold; margin-right:6px;">${number}.</span>`);
-                }
-                number++;
-            }
-        });
-    }
 });
 
 // ================================================================== 
