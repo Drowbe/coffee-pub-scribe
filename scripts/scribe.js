@@ -144,30 +144,37 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
     // Check if the export button already exists
     if (windowHeader.find('.scribe-journal-export-button').length > 0) return;
     
-    // Create the export button as an <a> tag
-    const exportButton = $(
-        `<a class="header-button control scribe-journal-export-button" href="#" title="Export Journal" data-journal-id="${journalSheet.object.id}">
-            <i class="fas fa-cloud-arrow-down"></i> Export
-        </a>`
-    );
-    
-    // Add the button to the window header (before the close button)
+    // Create the export button as a DOM <a> element for compatibility
+    const exportButton = document.createElement('a');
+    exportButton.className = 'header-button control scribe-journal-export-button';
+    exportButton.href = '#';
+    exportButton.title = 'Export Journal';
+    exportButton.setAttribute('data-journal-id', journalSheet.object.id);
+    exportButton.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Export';
+    // Insert before the close button
     const closeButton = windowHeader.find('.close');
     if (closeButton.length > 0) {
         closeButton.before(exportButton);
     } else {
         windowHeader.append(exportButton);
     }
-    
-    // Add click event listener
-    exportButton.click((event) => {
+    // Assign the onclick property immediately after insertion
+    exportButton.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
         openJournalForPrinting(journalSheet.object);
-    });
-
-    // Add a dummy onclick property to suppress Foundry's error
-    exportButton[0].onclick = () => {};
+    };
+    // Defensive: re-assign after a short delay to catch any Foundry re-renders
+    setTimeout(() => {
+        const btn = windowHeader.find('.scribe-journal-export-button')[0];
+        if (btn) {
+            btn.onclick = (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                openJournalForPrinting(journalSheet.object);
+            };
+        }
+    }, 50);
 });
 
 // ================================================================== 
