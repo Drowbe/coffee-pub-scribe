@@ -1,50 +1,73 @@
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
+.coffee-pub-scribe-export body {
+    font-family: Helvetica, Tahoma, 'Segoe UI', Geneva, Verdana, sans-serif;
+    line-height: 1.2;
     margin: 20px;
     background: white;
     color: #333;
 }
-.journal-page {
+.coffee-pub-scribe-export .journal-page {
     margin-bottom: 30px;
 }
 
-h1 {
-    font-size: 5em;
+.coffee-pub-scribe-export h1 {
+    font-size: 3.5em;
     color: #f8f9fa; 
-    background-color: #2c3e50;
+    background-color: #0c1d2e;
     padding: 10px;
     border-radius: 8px;
     text-align: center;
     text-transform: uppercase;
+    font-family: Helvetica, Tahoma, 'Segoe UI', Geneva, Verdana, sans-serif;
+    margin-top: 15px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
-.journal-page h2 {
+.coffee-pub-scribe-export .journal-page h2 {
     font-size: 2.0em;
     color: #2c3e50; 
-    
+    font-family: Helvetica, Tahoma, 'Segoe UI', Geneva, Verdana, sans-serif;
+    border-bottom: 1px dotted #2c3e50b9;
 }
 
-.scribe-export-title {
+.coffee-pub-scribe-export .scribe-export-title {
     font-size: 2.5em;
-    color: #2c3e50; 
-    background-color: #2c3e501f;
-    padding: 2px 15px 2px 15px;
-    border: 2px solid #2c3e50b9;
-    border-radius: 6px;
+    color: #f8f9fa !important; 
+    background-color: #2c3e50e7;
+    padding: 2px 6px 2px 6px;
+    border: 0px solid #2c3e50b9;
+    border-radius: 8px;
     text-transform: uppercase;
+    font-weight: 900;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 20px;
+    margin-bottom: 10px;
 }
 
-.scribe-export-number {
-    font-weight: bold;
-    margin-right: 8px;
+.coffee-pub-scribe-export .scribe-export-number {
+    font-weight: 900;
+    
+    border: 0px solid #445f7a;
+    border-radius: 6px;
+    padding: 2px 14px 2px 14px;
+    background-color: #f8f9fa;
+    color: #445f7a;
+    margin-left: 0px;
+    margin-right: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    text-align: center;
+    display: inline-block;
 }
 
 
-.page-content {
+.coffee-pub-scribe-export .page-content {
     margin-left: 20px;
+    margin-right: 20px;
+    font-family: Helvetica, Tahoma, 'Segoe UI', Geneva, Verdana, sans-serif;
 }
-blockquote {
+.coffee-pub-scribe-export blockquote {
     background: #ebece6;
     border-top: 3px solid #445f7a;
     border-right: 3px solid #445f7a;
@@ -54,35 +77,40 @@ blockquote {
     padding: 15px;
     border-radius: 6px;
 }
-blockquote h4 {
+.coffee-pub-scribe-export blockquote h4 {
     color: #2c3e50;
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 1.6em;
     text-transform: uppercase;
 }
-blockquote h5 {
+.coffee-pub-scribe-export blockquote h5 {
     color: #2c3e50;
     margin-top: 0;
     margin-bottom: 5px;
     font-size: 1.4em;
     text-transform: uppercase;
 }
-blockquote h6 {
+.coffee-pub-scribe-export blockquote h6 {
     margin-top: 0;
     margin-bottom: 2px;
     font-size: 1.0em;
     font-weight: 400;
 }
-blockquote h6 b {
-    color: #2c3f08;
+.coffee-pub-scribe-export blockquote h6 b {
+    color: #303030;
     margin-top: 0;
     margin-right: 5px;
     font-size: 1.0em;
-    font-weight: 900;
+    font-weight:600;
     text-transform: uppercase;
 }
-img {
+
+.coffee-pub-scribe-export blockquote hr {
+    border-bottom: 1px solid #44444425;
+}
+
+.coffee-pub-scribe-export img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
@@ -90,19 +118,19 @@ img {
     border: 1px solid #445f7a8a;
 }
 
-hr {
-    border-bottom: 1px dotted #445f7a8a;
+.coffee-pub-scribe-export hr {
+    border-bottom: 1px solid #445f7a;
 }
 
 @media print {
     body {
         margin: 0;
-        padding: 15px;
+        padding: 10px;
     }
-    .journal-page {
+    .coffee-pub-scribe-export .journal-page {
         page-break-inside: avoid;
     }
-    .page-content {
+    .coffee-pub-scribe-export .page-content {
         margin-left: 0;
     }
 }

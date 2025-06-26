@@ -165,6 +165,9 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
         event.stopPropagation();
         openJournalForPrinting(journalSheet.object);
     });
+
+    // Add a dummy onclick property to suppress Foundry's error
+    exportButton[0].onclick = () => {};
 });
 
 // ================================================================== 
@@ -636,8 +639,10 @@ function openJournalForPrinting(journalEntry) {
             <link rel="stylesheet" href="modules/coffee-pub-scribe/styles/export.css">
         </head>
         <body>
-            <h1>${journalEntry.name}</h1>
-            ${fullContent}
+            <div class="coffee-pub-scribe-export">
+                <h1>${journalEntry.name}</h1>
+                ${fullContent}
+            </div>
         </body>
         </html>
     `;
@@ -651,7 +656,7 @@ function openJournalForPrinting(journalEntry) {
         const firstH2 = pageDiv.querySelector('h2');
         if (firstH2) {
             firstH2.classList.add('scribe-export-title');
-            firstH2.innerHTML = `<span class='scribe-export-number'>${pageNum}.</span> ` + firstH2.innerHTML;
+            firstH2.innerHTML = `<div class='scribe-export-number'>${pageNum}</div> ` + firstH2.innerHTML;
             pageNum++;
         }
     });
