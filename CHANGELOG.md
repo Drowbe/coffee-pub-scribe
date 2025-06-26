@@ -10,13 +10,19 @@ All notable changes to this project will be documented in this file.
 - Each exported journal page is styled for clarity and print-friendliness, including page breaks and responsive design.
 - Top-level section numbers are automatically prepended to the first <h2> of each exported journal page, starting from 0, to match map and navigation correlation.
 - Export/print removes Scribe toolbars and extraneous UI for a clean output.
+- All export/print CSS is now namespaced under `.coffee-pub-scribe-export` for style isolation and maintainability.
+- Exported section numbers are now rendered as a styled <div> for improved appearance.
+- The first <h2> in each exported page now receives a `.scribe-export-title` class for targeted styling.
+- Export/print view uses improved fonts, layout, and color for better readability and aesthetics.
 
 ### Changed
 - Improved UI integration for export functionality in the journal window.
 - CSS for export button and print/export output refined for consistency and usability.
+- Export button event handling is now robust and compatible with Foundry VTT's internal quirks (assigns `onclick` directly and defensively).
 
 ### Fixed
 - Exported journal numbering now matches the order and structure of the in-app navigation and map references.
+- Export/print CSS no longer conflicts with other modules or Foundry styles due to namespacing.
 
 ## [0.2.0] - 2024-03-19
 
