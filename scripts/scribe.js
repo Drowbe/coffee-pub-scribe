@@ -161,21 +161,19 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
     } else {
         windowHeader.append(exportButton);
     }
-    // Assign the onclick property immediately after insertion
-    exportButton.onclick = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        openJournalForPrinting(journalSheet.object);
-    };
     // Defensive: re-assign after a short delay to catch any Foundry re-renders
     setTimeout(() => {
-        const btn = windowHeader.find('.scribe-journal-export-button')[0];
-        if (btn) {
-            btn.onclick = (event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                openJournalForPrinting(journalSheet.object);
-            };
+        try {
+            const btn = windowHeader.find('.scribe-journal-export-button')[0];
+            if (btn) {
+                btn.onclick = (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openJournalForPrinting(journalSheet.object);
+                };
+            }
+        } catch (e) {
+            // Fail silently if button is not present
         }
     }, 50);
 });
