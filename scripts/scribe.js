@@ -317,6 +317,193 @@ function addToolbarToBlockquotes(html) {
 }
 
 // ************************************
+// ** JOURNAL PRINT: RESOLVE REFERENCES
+// ************************************
+async function resolveContentReferences(content) {
+    if (!content) return content;
+    // Patterns to match @UUID and @Embed references
+    // Updated to handle both with and without display text
+    const uuidPattern = /@UUID\[([^\]]+)\](?:\{([^}]+)\})?/g;
+    const embedPattern = /@Embed\[([^\]]+)\](?:\{([^}]+)\})?/g;
+    let resolvedContent = content;
+    // Function to resolve a single reference
+    async function resolveReference(uuid) {
+        try {
+            // Parse the UUID to get document type and ID
+            const parts = uuid.split('.');
+            if (parts.length < 3) return null;
+            const documentType = parts[parts.length - 2]; // e.g., "Item", "JournalEntry"
+            const documentId = parts[parts.length - 1];   // e.g., "tcoeFeatArtifice"
+            // Handle different document types
+            switch (documentType) {
+                case 'Item':
+                    // Try to get from compendium first, then from game
+                    let item = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                item = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        item = game.items.get(documentId);
+                    }
+                    if (item) {
+                        return `
+                            <div class="resolved-item">
+                                <h4>${item.name}</h4>
+                                <div class="item-description">${item.system?.description?.value || item.description || 'No description available.'}</div>
+                            </div>
+                        `;
+                    }
+                    break;
+                case 'JournalEntry':
+                    // Try to get from compendium first, then from game
+                    let journal = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                journal = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        journal = game.journal.get(documentId);
+                    }
+                    if (journal) {
+                        let journalContent = `<div class="resolved-journal"><h4>${journal.name}</h4>`;
+                        // If it's a specific page reference
+                        if (parts.length > 3 && parts[parts.length - 3] === 'JournalEntryPage') {
+                            const pageId = parts[parts.length - 1];
+                            const page = journal.pages.get(pageId);
+                            if (page) {
+                                journalContent += `<div class="journal-page-content">${page.text.content}</div>`;
+                            }
+                        } else {
+                            // Include all pages
+                            journal.pages.forEach(page => {
+                                journalContent += `<div class="journal-page-content"><h5>${page.name}</h5>${page.text.content}</div>`;
+                            });
+                        }
+                        journalContent += '</div>';
+                        return journalContent;
+                    }
+                    break;
+                case 'Actor':
+                    let actor = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                actor = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        actor = game.actors.get(documentId);
+                    }
+                    if (actor) {
+                        return `
+                            <div class="resolved-actor">
+                                <h4>${actor.name}</h4>
+                                <div class="actor-description">${actor.system?.description?.value || actor.description || 'No description available.'}</div>
+                            </div>
+                        `;
+                    }
+                    break;
+                default:
+                    // For other document types, try to get them generically
+                    let document = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                document = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        // Try to get from game collections
+                        const collection = game[documentType.toLowerCase() + 's'];
+                        if (collection) {
+                            document = collection.get(documentId);
+                        }
+                    }
+                    if (document) {
+                        return `
+                            <div class="resolved-${documentType.toLowerCase()}">
+                                <h4>${document.name}</h4>
+                                <div class="${documentType.toLowerCase()}-description">${document.system?.description?.value || document.description || 'No description available.'}</div>
+                            </div>
+                        `;
+                    }
+                    break;
+            }
+        } catch (error) {
+            console.warn(`Failed to resolve reference ${uuid}:`, error);
+        }
+        return null;
+    }
+    // Replace @UUID references
+    const uuidMatches = [...content.matchAll(uuidPattern)];
+    for (const match of uuidMatches) {
+        const fullMatch = match[0];
+        const uuid = match[1];
+        const displayText = match[2]; // This will be undefined if no display text
+        if (displayText) {
+            // Has display text, format it as bold with color
+            const formattedText = `<span class=\"uuid-link-text\">${displayText}</span>`;
+            resolvedContent = resolvedContent.replace(fullMatch, formattedText);
+        } else {
+            // No display text, try to resolve the full content
+            const resolved = await resolveReference(uuid);
+            if (resolved) {
+                resolvedContent = resolvedContent.replace(fullMatch, resolved);
+            }
+        }
+    }
+    // Replace @Embed references (same as @UUID but with different formatting)
+    const embedMatches = [...content.matchAll(embedPattern)];
+    for (const match of embedMatches) {
+        const fullMatch = match[0];
+        const uuid = match[1];
+        const displayText = match[2]; // This will be undefined if no display text
+        if (displayText) {
+            // Has display text, format it as bold with color
+            const formattedText = `<span class=\"uuid-link-text\">${displayText}</span>`;
+            resolvedContent = resolvedContent.replace(fullMatch, formattedText);
+        } else {
+            // No display text, try to resolve the full content
+            const resolved = await resolveReference(uuid);
+            if (resolved) {
+                resolvedContent = resolvedContent.replace(fullMatch, resolved);
+            }
+        }
+    }
+    return resolvedContent;
+}
+
+// ************************************
+// ** RECURSIVE RESOLVER FOR REFERENCES
+// ************************************
+async function resolveAllReferences(content) {
+    let previous;
+    let current = content;
+    do {
+        previous = current;
+        current = await resolveContentReferences(previous);
+    } while (current !== previous);
+    return current;
+}
+
+// ************************************
 // ** TOOLBAR: EXPORT NARRATIVE TO HTML   
 // ************************************
 async function exportNarrationToHTML() {
@@ -331,8 +518,8 @@ async function exportNarrationToHTML() {
         // Call scrubHTML function to clean the HTML
         clonedContent = scrubHTML(clonedContent);
         
-        // Resolve UUID and Embed references
-        let resolvedContent = await resolveContentReferences(clonedContent.innerHTML);
+        // Recursively resolve UUID and Embed references
+        let resolvedContent = await resolveAllReferences(clonedContent.innerHTML);
         
         let style = SCRIBE_HTML_EXPORT_CSS;
 
@@ -604,200 +791,6 @@ function changeCSS(cssFile) {
 }
 
 // ************************************
-// ** JOURNAL PRINT: RESOLVE REFERENCES
-// ************************************
-async function resolveContentReferences(content) {
-    if (!content) return content;
-    
-    // Patterns to match @UUID and @Embed references
-    // Updated to handle both with and without display text
-    const uuidPattern = /@UUID\[([^\]]+)\](?:\{([^}]+)\})?/g;
-    const embedPattern = /@Embed\[([^\]]+)\](?:\{([^}]+)\})?/g;
-    
-    let resolvedContent = content;
-    
-    // Function to resolve a single reference
-    async function resolveReference(uuid) {
-        try {
-            // Parse the UUID to get document type and ID
-            const parts = uuid.split('.');
-            if (parts.length < 3) return null;
-            
-            const documentType = parts[parts.length - 2]; // e.g., "Item", "JournalEntry"
-            const documentId = parts[parts.length - 1];   // e.g., "tcoeFeatArtifice"
-            
-            // Handle different document types
-            switch (documentType) {
-                case 'Item':
-                    // Try to get from compendium first, then from game
-                    let item = null;
-                    if (uuid.startsWith('Compendium.')) {
-                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
-                        if (compendium) {
-                            const index = await compendium.getIndex();
-                            const entry = index.find(e => e._id === documentId);
-                            if (entry) {
-                                item = await compendium.getDocument(entry._id);
-                            }
-                        }
-                    } else {
-                        item = game.items.get(documentId);
-                    }
-                    
-                    if (item) {
-                        return `
-                            <div class="resolved-item">
-                                <h4>${item.name}</h4>
-                                <div class="item-description">${item.system?.description?.value || item.description || 'No description available.'}</div>
-                            </div>
-                        `;
-                    }
-                    break;
-                    
-                case 'JournalEntry':
-                    // Try to get from compendium first, then from game
-                    let journal = null;
-                    if (uuid.startsWith('Compendium.')) {
-                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
-                        if (compendium) {
-                            const index = await compendium.getIndex();
-                            const entry = index.find(e => e._id === documentId);
-                            if (entry) {
-                                journal = await compendium.getDocument(entry._id);
-                            }
-                        }
-                    } else {
-                        journal = game.journal.get(documentId);
-                    }
-                    
-                    if (journal) {
-                        let journalContent = `<div class="resolved-journal"><h4>${journal.name}</h4>`;
-                        
-                        // If it's a specific page reference
-                        if (parts.length > 3 && parts[parts.length - 3] === 'JournalEntryPage') {
-                            const pageId = parts[parts.length - 1];
-                            const page = journal.pages.get(pageId);
-                            if (page) {
-                                journalContent += `<div class="journal-page-content">${page.text.content}</div>`;
-                            }
-                        } else {
-                            // Include all pages
-                            journal.pages.forEach(page => {
-                                journalContent += `<div class="journal-page-content"><h5>${page.name}</h5>${page.text.content}</div>`;
-                            });
-                        }
-                        
-                        journalContent += '</div>';
-                        return journalContent;
-                    }
-                    break;
-                    
-                case 'Actor':
-                    let actor = null;
-                    if (uuid.startsWith('Compendium.')) {
-                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
-                        if (compendium) {
-                            const index = await compendium.getIndex();
-                            const entry = index.find(e => e._id === documentId);
-                            if (entry) {
-                                actor = await compendium.getDocument(entry._id);
-                            }
-                        }
-                    } else {
-                        actor = game.actors.get(documentId);
-                    }
-                    
-                    if (actor) {
-                        return `
-                            <div class="resolved-actor">
-                                <h4>${actor.name}</h4>
-                                <div class="actor-description">${actor.system?.description?.value || actor.description || 'No description available.'}</div>
-                            </div>
-                        `;
-                    }
-                    break;
-                    
-                default:
-                    // For other document types, try to get them generically
-                    let document = null;
-                    if (uuid.startsWith('Compendium.')) {
-                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
-                        if (compendium) {
-                            const index = await compendium.getIndex();
-                            const entry = index.find(e => e._id === documentId);
-                            if (entry) {
-                                document = await compendium.getDocument(entry._id);
-                            }
-                        }
-                    } else {
-                        // Try to get from game collections
-                        const collection = game[documentType.toLowerCase() + 's'];
-                        if (collection) {
-                            document = collection.get(documentId);
-                        }
-                    }
-                    
-                    if (document) {
-                        return `
-                            <div class="resolved-${documentType.toLowerCase()}">
-                                <h4>${document.name}</h4>
-                                <div class="${documentType.toLowerCase()}-description">${document.system?.description?.value || document.description || 'No description available.'}</div>
-                            </div>
-                        `;
-                    }
-                    break;
-            }
-        } catch (error) {
-            console.warn(`Failed to resolve reference ${uuid}:`, error);
-        }
-        
-        return null;
-    }
-    
-    // Replace @UUID references
-    const uuidMatches = [...content.matchAll(uuidPattern)];
-    for (const match of uuidMatches) {
-        const fullMatch = match[0];
-        const uuid = match[1];
-        const displayText = match[2]; // This will be undefined if no display text
-        
-        if (displayText) {
-            // Has display text, format it as bold with color
-            const formattedText = `<span class="uuid-link-text">${displayText}</span>`;
-            resolvedContent = resolvedContent.replace(fullMatch, formattedText);
-        } else {
-            // No display text, try to resolve the full content
-            const resolved = await resolveReference(uuid);
-            if (resolved) {
-                resolvedContent = resolvedContent.replace(fullMatch, resolved);
-            }
-        }
-    }
-    
-    // Replace @Embed references (same as @UUID but with different formatting)
-    const embedMatches = [...content.matchAll(embedPattern)];
-    for (const match of embedMatches) {
-        const fullMatch = match[0];
-        const uuid = match[1];
-        const displayText = match[2]; // This will be undefined if no display text
-        
-        if (displayText) {
-            // Has display text, format it as bold with color
-            const formattedText = `<span class="uuid-link-text">${displayText}</span>`;
-            resolvedContent = resolvedContent.replace(fullMatch, formattedText);
-        } else {
-            // No display text, try to resolve the full content
-            const resolved = await resolveReference(uuid);
-            if (resolved) {
-                resolvedContent = resolvedContent.replace(fullMatch, resolved);
-            }
-        }
-    }
-    
-    return resolvedContent;
-}
-
-// ************************************
 // ** JOURNAL PRINT: OPEN FOR PRINTING
 // ************************************
 async function openJournalForPrinting(journalEntry) {
@@ -824,8 +817,8 @@ async function openJournalForPrinting(journalEntry) {
             toolbars.forEach(toolbar => toolbar.remove());
             pageContent = tempDiv.innerHTML;
             
-            // Resolve UUID and Embed references
-            pageContent = await resolveContentReferences(pageContent);
+            // Recursively resolve UUID and Embed references
+            pageContent = await resolveAllReferences(pageContent);
             
             // Add page header
             fullContent += `
