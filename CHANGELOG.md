@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.12.2] - Journal Export Enhancements
+
+### Added
+- Export now recursively resolves all `@UUID` and `@Embed` references, even nested or inline, in journal content.
+- UUID links with display text (e.g., `@UUID[...]{text}`) are now rendered as bold, colored text instead of links.
+- Export button is now visible to GMs, Assistant GMs, Trusted Players, and any player with permission to view the journal.
+- Added and updated CSS for resolved content and UUID link text in both embedded and export stylesheets.
+
+### Fixed
+- Improved error handling for export button setup to prevent console errors if the button is missing.
+- Refactored code for better reliability and maintainability.
+
+### Known Issues
+- A harmless console error from Foundry core may still appear if the export button is removed during re-render.
+
 ## [1.12.1] - Journal Export
 
 ### Added
