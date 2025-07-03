@@ -122,6 +122,66 @@
     border-bottom: 1px solid #445f7a;
 }
 
+/* Resolved Content Styling for Export */
+.coffee-pub-scribe-export .resolved-item, 
+.coffee-pub-scribe-export .resolved-journal, 
+.coffee-pub-scribe-export .resolved-actor {
+    border: 2px solid #445f7a;
+    border-radius: 6px;
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    page-break-inside: avoid;
+}
+
+.coffee-pub-scribe-export .resolved-item h4, 
+.coffee-pub-scribe-export .resolved-journal h4, 
+.coffee-pub-scribe-export .resolved-actor h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-weight: bold;
+    font-size: 1.4em;
+    text-transform: uppercase;
+    border-bottom: 1px solid #445f7a;
+    padding-bottom: 5px;
+}
+
+.coffee-pub-scribe-export .item-description, 
+.coffee-pub-scribe-export .actor-description {
+    font-size: 0.95em;
+    line-height: 1.5;
+    color: #333;
+}
+
+.coffee-pub-scribe-export .journal-page-content {
+    margin: 10px 0;
+    padding: 10px;
+    border-left: 4px solid #445f7a;
+    background-color: #fff;
+    border-radius: 0 4px 4px 0;
+}
+
+.coffee-pub-scribe-export .journal-page-content h5 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1.2em;
+    color: #2c3e50;
+    font-weight: bold;
+}
+
+/* UUID Link Text Styling for Export */
+.coffee-pub-scribe-export .uuid-link-text {
+    font-weight: bold;
+    color: #2c3e50;
+    text-decoration: none;
+    background-color: #ecf0f1;
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid #bdc3c7;
+    font-size: 0.95em;
+}
+
 @media print {
     body {
         margin: 0;
@@ -132,6 +192,11 @@
     }
     .coffee-pub-scribe-export .page-content {
         margin-left: 0;
+    }
+    .coffee-pub-scribe-export .resolved-item, 
+    .coffee-pub-scribe-export .resolved-journal, 
+    .coffee-pub-scribe-export .resolved-actor {
+        page-break-inside: avoid;
     }
 }
 

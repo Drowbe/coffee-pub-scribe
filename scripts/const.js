@@ -144,4 +144,50 @@ export const SCRIBE_HTML_EXPORT_CSS = `
             padding-left: 0px;
             padding-right: 0px;	
         }
+        
+        /* Resolved Content Styling */
+        .resolved-item, .resolved-journal, .resolved-actor {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .resolved-item h4, .resolved-journal h4, .resolved-actor h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .item-description, .actor-description {
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+        
+        .journal-page-content {
+            margin: 8px 0;
+            padding: 8px;
+            border-left: 3px solid #ddd;
+            background-color: #fff;
+        }
+        
+        .journal-page-content h5 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+            color: #555;
+        }
+        
+        /* UUID Link Text Styling */
+        .uuid-link-text {
+            font-weight: bold;
+            color: #2c3e50;
+            text-decoration: none;
+            background-color: #ecf0f1;
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid #bdc3c7;
+        }
         `

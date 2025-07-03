@@ -134,8 +134,11 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
     const exportButtonEnabled = game.settings.get(MODULE_ID, 'toolbarButtonPrint');
     if (!exportButtonEnabled) return;
     
-    // Check if the user is a GM
-    if (!game.user.hasRole("GAMEMASTER")) return;
+    // Check if the user can view the journal (GM, Assistant GM, Trusted Players, or Players with permission)
+    if (!game.user.hasRole("GAMEMASTER") && !game.user.hasRole("ASSISTANT") && !game.user.hasRole("TRUSTED")) {
+        // For regular players, check if they have permission to view this specific journal
+        if (!journalSheet.object.testUserPermission(game.user, "LIMITED")) return;
+    }
     
     // Find the window header
     const windowHeader = html.find('.window-header');
@@ -316,7 +319,7 @@ function addToolbarToBlockquotes(html) {
 // ************************************
 // ** TOOLBAR: EXPORT NARRATIVE TO HTML   
 // ************************************
-function exportNarrationToHTML() {
+async function exportNarrationToHTML() {
     const filename = prompt("Enter the name for the HTML file to be created");
     if (!filename) return;
 
@@ -324,12 +327,16 @@ function exportNarrationToHTML() {
     let clonedContent = divContent.cloneNode(true);
 
     // Use setTimeout to break down the tasks
-    setTimeout(() => {
+    setTimeout(async () => {
         // Call scrubHTML function to clean the HTML
         clonedContent = scrubHTML(clonedContent);
+        
+        // Resolve UUID and Embed references
+        let resolvedContent = await resolveContentReferences(clonedContent.innerHTML);
+        
         let style = SCRIBE_HTML_EXPORT_CSS;
 
-        let htmlContent = '<html>\n<head>\n<title>' + filename + '</title>\n<style>' + style + '</style>\n</head>\n<body>\n' + clonedContent.innerHTML + '\n</body>\n</html>';
+        let htmlContent = '<html>\n<head>\n<title>' + filename + '</title>\n<style>' + style + '</style>\n</head>\n<body>\n' + resolvedContent + '\n</body>\n</html>';
         ui.notifications.info(`The file '${filename}.html' was saved to your default download location.`);
         const blob = new Blob([htmlContent], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
@@ -597,9 +604,203 @@ function changeCSS(cssFile) {
 }
 
 // ************************************
+// ** JOURNAL PRINT: RESOLVE REFERENCES
+// ************************************
+async function resolveContentReferences(content) {
+    if (!content) return content;
+    
+    // Patterns to match @UUID and @Embed references
+    // Updated to handle both with and without display text
+    const uuidPattern = /@UUID\[([^\]]+)\](?:\{([^}]+)\})?/g;
+    const embedPattern = /@Embed\[([^\]]+)\](?:\{([^}]+)\})?/g;
+    
+    let resolvedContent = content;
+    
+    // Function to resolve a single reference
+    async function resolveReference(uuid) {
+        try {
+            // Parse the UUID to get document type and ID
+            const parts = uuid.split('.');
+            if (parts.length < 3) return null;
+            
+            const documentType = parts[parts.length - 2]; // e.g., "Item", "JournalEntry"
+            const documentId = parts[parts.length - 1];   // e.g., "tcoeFeatArtifice"
+            
+            // Handle different document types
+            switch (documentType) {
+                case 'Item':
+                    // Try to get from compendium first, then from game
+                    let item = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                item = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        item = game.items.get(documentId);
+                    }
+                    
+                    if (item) {
+                        return `
+                            <div class="resolved-item">
+                                <h4>${item.name}</h4>
+                                <div class="item-description">${item.system?.description?.value || item.description || 'No description available.'}</div>
+                            </div>
+                        `;
+                    }
+                    break;
+                    
+                case 'JournalEntry':
+                    // Try to get from compendium first, then from game
+                    let journal = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                journal = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        journal = game.journal.get(documentId);
+                    }
+                    
+                    if (journal) {
+                        let journalContent = `<div class="resolved-journal"><h4>${journal.name}</h4>`;
+                        
+                        // If it's a specific page reference
+                        if (parts.length > 3 && parts[parts.length - 3] === 'JournalEntryPage') {
+                            const pageId = parts[parts.length - 1];
+                            const page = journal.pages.get(pageId);
+                            if (page) {
+                                journalContent += `<div class="journal-page-content">${page.text.content}</div>`;
+                            }
+                        } else {
+                            // Include all pages
+                            journal.pages.forEach(page => {
+                                journalContent += `<div class="journal-page-content"><h5>${page.name}</h5>${page.text.content}</div>`;
+                            });
+                        }
+                        
+                        journalContent += '</div>';
+                        return journalContent;
+                    }
+                    break;
+                    
+                case 'Actor':
+                    let actor = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                actor = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        actor = game.actors.get(documentId);
+                    }
+                    
+                    if (actor) {
+                        return `
+                            <div class="resolved-actor">
+                                <h4>${actor.name}</h4>
+                                <div class="actor-description">${actor.system?.description?.value || actor.description || 'No description available.'}</div>
+                            </div>
+                        `;
+                    }
+                    break;
+                    
+                default:
+                    // For other document types, try to get them generically
+                    let document = null;
+                    if (uuid.startsWith('Compendium.')) {
+                        const compendium = game.packs.get(uuid.split('.')[1] + '.' + uuid.split('.')[2]);
+                        if (compendium) {
+                            const index = await compendium.getIndex();
+                            const entry = index.find(e => e._id === documentId);
+                            if (entry) {
+                                document = await compendium.getDocument(entry._id);
+                            }
+                        }
+                    } else {
+                        // Try to get from game collections
+                        const collection = game[documentType.toLowerCase() + 's'];
+                        if (collection) {
+                            document = collection.get(documentId);
+                        }
+                    }
+                    
+                    if (document) {
+                        return `
+                            <div class="resolved-${documentType.toLowerCase()}">
+                                <h4>${document.name}</h4>
+                                <div class="${documentType.toLowerCase()}-description">${document.system?.description?.value || document.description || 'No description available.'}</div>
+                            </div>
+                        `;
+                    }
+                    break;
+            }
+        } catch (error) {
+            console.warn(`Failed to resolve reference ${uuid}:`, error);
+        }
+        
+        return null;
+    }
+    
+    // Replace @UUID references
+    const uuidMatches = [...content.matchAll(uuidPattern)];
+    for (const match of uuidMatches) {
+        const fullMatch = match[0];
+        const uuid = match[1];
+        const displayText = match[2]; // This will be undefined if no display text
+        
+        if (displayText) {
+            // Has display text, format it as bold with color
+            const formattedText = `<span class="uuid-link-text">${displayText}</span>`;
+            resolvedContent = resolvedContent.replace(fullMatch, formattedText);
+        } else {
+            // No display text, try to resolve the full content
+            const resolved = await resolveReference(uuid);
+            if (resolved) {
+                resolvedContent = resolvedContent.replace(fullMatch, resolved);
+            }
+        }
+    }
+    
+    // Replace @Embed references (same as @UUID but with different formatting)
+    const embedMatches = [...content.matchAll(embedPattern)];
+    for (const match of embedMatches) {
+        const fullMatch = match[0];
+        const uuid = match[1];
+        const displayText = match[2]; // This will be undefined if no display text
+        
+        if (displayText) {
+            // Has display text, format it as bold with color
+            const formattedText = `<span class="uuid-link-text">${displayText}</span>`;
+            resolvedContent = resolvedContent.replace(fullMatch, formattedText);
+        } else {
+            // No display text, try to resolve the full content
+            const resolved = await resolveReference(uuid);
+            if (resolved) {
+                resolvedContent = resolvedContent.replace(fullMatch, resolved);
+            }
+        }
+    }
+    
+    return resolvedContent;
+}
+
+// ************************************
 // ** JOURNAL PRINT: OPEN FOR PRINTING
 // ************************************
-function openJournalForPrinting(journalEntry) {
+async function openJournalForPrinting(journalEntry) {
     // Get all pages from the journal
     const pages = journalEntry.pages.contents;
     if (!pages || pages.length === 0) {
@@ -611,7 +812,7 @@ function openJournalForPrinting(journalEntry) {
     let fullContent = '';
     let pageNumber = 1;
     
-    pages.forEach(page => {
+    for (const page of pages) {
         if (page.type === 'text' && page.text && page.text.content) {
             // Clone the content to avoid modifying the original
             let pageContent = page.text.content;
@@ -622,6 +823,9 @@ function openJournalForPrinting(journalEntry) {
             const toolbars = tempDiv.querySelectorAll('.scribe-journal-buttons-wrapper');
             toolbars.forEach(toolbar => toolbar.remove());
             pageContent = tempDiv.innerHTML;
+            
+            // Resolve UUID and Embed references
+            pageContent = await resolveContentReferences(pageContent);
             
             // Add page header
             fullContent += `
@@ -634,7 +838,7 @@ function openJournalForPrinting(journalEntry) {
             `;
             pageNumber++;
         }
-    });
+    }
     
     // Create the complete HTML document
     let htmlContent = `
