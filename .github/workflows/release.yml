@@ -30,7 +30,7 @@ jobs:
       - name: Create Zip File
         run: |
           # Ensure the zip excludes unnecessary files
-          zip -r module.zip \
+          zip -r coffee-pub-scribe.zip \
             module.json \
             LICENSE \
             README.md \
@@ -50,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: |
-            module.zip
+            coffee-pub-scribe.zip
             module.json
           draft: false
           prerelease: false
