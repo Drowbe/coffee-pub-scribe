@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [12.1.0] - MAJOR UPDATE - Blacksmith API Migration
+
+### Added
+- **Blacksmith API Integration**: Complete migration to the new Coffee Pub Blacksmith API system
+- **Enhanced Module Relationships**: Added comprehensive module recommendations including Coffee Pub Monarch, Squire, and other ecosystem modules
+- **Improved Author Information**: Enhanced author profiles with Discord, GitHub, Patreon, and Reddit links for better community engagement
+- **Bug Reporting Integration**: Added direct GitHub Issues link for streamlined bug reporting and feature requests
+
+### Changed
+- **Version Numbering**: Migrated from semantic versioning (1.12.2) to Foundry VTT version-based numbering (12.1.0)
+- **Foundry Compatibility**: Updated compatibility to focus on Foundry VTT v12, removing v13 maximum compatibility
+- **Module Dependencies**: Restructured module relationships with Coffee Pub Blacksmith as a required dependency
+- **Author Structure**: Enhanced author information with comprehensive social media and contribution details
+- **Library Configuration**: Updated library field to use array format for future extensibility
+
+### Breaking Changes
+- **Required Dependency**: Coffee Pub Blacksmith is now a required dependency for this module to function
+- **Version Compatibility**: Module now requires Foundry VTT v12 specifically
+- **API Changes**: Internal API changes to support the new Blacksmith system
+
+### Technical Details
+- **Module Manifest**: Updated to use latest release manifest URLs
+- **Download Links**: Streamlined release and download URLs for better distribution
+- **Relationship Structure**: Reorganized module relationships for improved dependency management
+
 ## [1.12.2] - Journal Export Enhancements
 
 ### Added
