@@ -22,13 +22,6 @@ import { registerSettings } from './settings.js';
 import {ImageFormApplication, showDialogueFromImageButton} from './dialogue-illustration.js';
 
 
-
-
-
-
-
-
-
 // === BEGIN: BLACKSMITH API REGISTRATION ===
 import { BlacksmithAPI } from '/modules/coffee-pub-blacksmith/api/blacksmith-api.js';
 // Register your module with Blacksmith (use 'ready' instead of 'init')
@@ -48,9 +41,6 @@ Hooks.once('ready', async () => {
     }
 });
 // === END: BLACKSMITH API REGISTRATION ===
-
-
-
 
 
 // ========== BEGIN: BLACKSMITH API TESTING ==========
