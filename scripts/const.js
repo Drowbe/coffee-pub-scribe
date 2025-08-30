@@ -43,19 +43,12 @@ export const MODULE = {
     DESCRIPTION: moduleData.description,
 };
 
-
-
-
-// MIGRATION need to migrate this stuff
-
-export const MODULE_TITLE = 'SCRIBE'
-export const MODULE_ID = 'coffee-pub-scribe'
 export const SCRIBE = {
-    ID: MODULE_ID,
+    ID: MODULE.ID,
     TEST_VAR: `This is a test variable. You got it.`,
-    DIALOGUE_ILLUSTRATION_TEMPLATE: `modules/${MODULE_ID}/templates/dialogue-illustration.hbs`,
-    PATH_SOUND:`modules/${MODULE_ID}/sounds/`,
-    PATH_IMAGES:`modules/${MODULE_ID}/images/`,
+    DIALOGUE_ILLUSTRATION_TEMPLATE: `modules/${MODULE.ID}/templates/dialogue-illustration.hbs`,
+    PATH_SOUND:`modules/${MODULE.ID}/sounds/`,
+    PATH_IMAGES:`modules/${MODULE.ID}/images/`,
 }
 
 export const SCRIBE_HTML_EXPORT_CSS = `

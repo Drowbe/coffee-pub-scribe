@@ -3,7 +3,7 @@
 // ================================================================== 
 
 // Grab the module data
-import { MODULE_TITLE, MODULE_ID, SCRIBE  } from './const.js';
+import { MODULE, SCRIBE  } from './const.js';
 // -- Import the shared GLOBAL variables --
 import { COFFEEPUB, MODULE_AUTHOR } from './global.js';
 // -- Load the shared GLOBAL functions --
@@ -29,9 +29,9 @@ export const registerSettings = () => {
     // Register settings...
 
 	// ---------- TITLE SCRIBE----------
-	game.settings.register(MODULE_ID, "headingH1Scribe", {
-		name: MODULE_ID + '.headingH1Scribe-Label',
-		hint: MODULE_ID + '.headingH1Scribe-Hint',
+	game.settings.register(MODULE.ID, "headingH1Scribe", {
+		name: MODULE.ID + '.headingH1Scribe-Label',
+		hint: MODULE.ID + '.headingH1Scribe-Hint',
 		scope: "world",
 		config: true,
 		default: "",
@@ -40,9 +40,9 @@ export const registerSettings = () => {
 	// -------------------------------------
 
 	// ---------- STYLE ----------
-	game.settings.register(MODULE_ID, "headingH2Theme", {
-		name: MODULE_ID + '.headingH2Theme-Label',
-		hint: MODULE_ID + '.headingH2Theme-Hint',
+	game.settings.register(MODULE.ID, "headingH2Theme", {
+		name: MODULE.ID + '.headingH2Theme-Label',
+		hint: MODULE.ID + '.headingH2Theme-Hint',
 		scope: "world",
 		config: true,
 		default: "",
@@ -50,9 +50,9 @@ export const registerSettings = () => {
 	});
 	// -------------------------------------
 
-	game.settings.register(MODULE_ID, 'cardTheme', {
-		name: MODULE_ID + '.cardTheme-Label',
-		hint: MODULE_ID + '.cardTheme-Hint',
+	game.settings.register(MODULE.ID, 'cardTheme', {
+		name: MODULE.ID + '.cardTheme-Label',
+		hint: MODULE.ID + '.cardTheme-Hint',
 		scope: 'world',
 		config: true,
 		requiresReload: true,
@@ -79,9 +79,9 @@ export const registerSettings = () => {
 
 
 	// ---------- TOOLBAR ----------
-	game.settings.register(MODULE_ID, "headingH2Toolbar", {
-		name: MODULE_ID + '.headingH2Toolbar-Label',
-		hint: MODULE_ID + '.headingH2Toolbar-Hint',
+	game.settings.register(MODULE.ID, "headingH2Toolbar", {
+		name: MODULE.ID + '.headingH2Toolbar-Label',
+		hint: MODULE.ID + '.headingH2Toolbar-Hint',
 		scope: "world",
 		config: true,
 		default: "",
@@ -90,9 +90,9 @@ export const registerSettings = () => {
 	// -------------------------------------
 
 	// -- TOOLBAR ENABLED --
-	game.settings.register(MODULE_ID, 'toolbarEnabled', {
-		name: MODULE_ID + '.toolbarEnabled-Label',
-		hint: MODULE_ID + '.toolbarEnabled-Hint',
+	game.settings.register(MODULE.ID, 'toolbarEnabled', {
+		name: MODULE.ID + '.toolbarEnabled-Label',
+		hint: MODULE.ID + '.toolbarEnabled-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -101,9 +101,9 @@ export const registerSettings = () => {
 	});
 
 	// -- BUTTON LABELS ENABLED --
-	game.settings.register(MODULE_ID, 'toolbarButtonLabelEnabled', {
-		name: MODULE_ID + '.toolbarButtonLabelEnabled-Label',
-		hint: MODULE_ID + '.toolbarButtonLabelEnabled-Hint',
+	game.settings.register(MODULE.ID, 'toolbarButtonLabelEnabled', {
+		name: MODULE.ID + '.toolbarButtonLabelEnabled-Label',
+		hint: MODULE.ID + '.toolbarButtonLabelEnabled-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -112,9 +112,9 @@ export const registerSettings = () => {
 	});
 
 	// -- NARRATION BUTTON --
-	game.settings.register(MODULE_ID, 'toolbarButtonNarration', {
-		name: MODULE_ID + '.toolbarButtonNarration-Label',
-		hint: MODULE_ID + '.toolbarButtonNarration-Hint',
+	game.settings.register(MODULE.ID, 'toolbarButtonNarration', {
+		name: MODULE.ID + '.toolbarButtonNarration-Label',
+		hint: MODULE.ID + '.toolbarButtonNarration-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -122,9 +122,9 @@ export const registerSettings = () => {
 		default: true,
 	});
 	// -- ILLUSTRATION BUTTON --
-	game.settings.register(MODULE_ID, 'toolbarButtonIllustration', {
-		name: MODULE_ID + '.toolbarButtonIllustration-Label',
-		hint: MODULE_ID + '.toolbarButtonIllustration-Hint',
+	game.settings.register(MODULE.ID, 'toolbarButtonIllustration', {
+		name: MODULE.ID + '.toolbarButtonIllustration-Label',
+		hint: MODULE.ID + '.toolbarButtonIllustration-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -132,9 +132,9 @@ export const registerSettings = () => {
 		default: true,
 	});
 	// -- HANDOUT BUTTON --
-	game.settings.register(MODULE_ID, 'toolbarButtonHandout', {
-		name: MODULE_ID + '.toolbarButtonHandout-Label',
-		hint: MODULE_ID + '.toolbarButtonHandout-Hint',
+	game.settings.register(MODULE.ID, 'toolbarButtonHandout', {
+		name: MODULE.ID + '.toolbarButtonHandout-Label',
+		hint: MODULE.ID + '.toolbarButtonHandout-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -142,9 +142,9 @@ export const registerSettings = () => {
 		default: true,
 	});
 	// -- COPY BUTTON --
-	game.settings.register(MODULE_ID, 'toolbarButtonCopy', {
-		name: MODULE_ID + '.toolbarButtonCopy-Label',
-		hint: MODULE_ID + '.toolbarButtonCopy-Hint',
+	game.settings.register(MODULE.ID, 'toolbarButtonCopy', {
+		name: MODULE.ID + '.toolbarButtonCopy-Label',
+		hint: MODULE.ID + '.toolbarButtonCopy-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -152,9 +152,9 @@ export const registerSettings = () => {
 	default: true,
 	});
 	// -- COPY BUTTON --
-	game.settings.register(MODULE_ID, 'toolbarButtonExport', {
-		name: MODULE_ID + '.toolbarButtonExport-Label',
-		hint: MODULE_ID + '.toolbarButtonExport-Hint',
+	game.settings.register(MODULE.ID, 'toolbarButtonExport', {
+		name: MODULE.ID + '.toolbarButtonExport-Label',
+		hint: MODULE.ID + '.toolbarButtonExport-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -163,9 +163,9 @@ export const registerSettings = () => {
 	});
 
 	// -- PRINT BUTTON --
-	game.settings.register(MODULE_ID, 'toolbarButtonPrint', {
-		name: MODULE_ID + '.toolbarButtonPrint-Label',
-		hint: MODULE_ID + '.toolbarButtonPrint-Hint',
+	game.settings.register(MODULE.ID, 'toolbarButtonPrint', {
+		name: MODULE.ID + '.toolbarButtonPrint-Label',
+		hint: MODULE.ID + '.toolbarButtonPrint-Hint',
 		type: Boolean,
 		config: true,
 		requiresReload: false,
@@ -174,9 +174,9 @@ export const registerSettings = () => {
 	});
 
 	// ----------  HANDOUTS ----------
-	game.settings.register(MODULE_ID, "headingH2Handouts", {
-		name: MODULE_ID + '.headingH2Handouts-Label',
-		hint: MODULE_ID + '.headingH2Handouts-Hint',
+	game.settings.register(MODULE.ID, "headingH2Handouts", {
+		name: MODULE.ID + '.headingH2Handouts-Label',
+		hint: MODULE.ID + '.headingH2Handouts-Hint',
 		scope: "world",
 		config: true,
 		default: "",
@@ -185,9 +185,9 @@ export const registerSettings = () => {
 	// -------------------------------------
 
 	// -- Handout Folder --
-	game.settings.register(MODULE_ID,'handoutFolder', {
-		name: MODULE_ID + '.handoutFolder-Label',
-		hint: MODULE_ID + '.handoutFolder-Hint',
+	game.settings.register(MODULE.ID,'handoutFolder', {
+		name: MODULE.ID + '.handoutFolder-Label',
+		hint: MODULE.ID + '.handoutFolder-Hint',
 		scope: "world",
 		config: true,
 		requiresReload: false,
@@ -196,9 +196,9 @@ export const registerSettings = () => {
 	});
 
 	// -- Folder Color --
-	game.settings.register(MODULE_ID,'folderColor', {
-		name: MODULE_ID + '.folderColor-Label',
-		hint: MODULE_ID + '.folderColor-Hint',
+	game.settings.register(MODULE.ID,'folderColor', {
+		name: MODULE.ID + '.folderColor-Label',
+		hint: MODULE.ID + '.folderColor-Hint',
 		scope: "world",
 		config: true,
 		requiresReload: false,
