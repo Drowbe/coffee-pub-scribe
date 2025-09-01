@@ -1,7 +1,7 @@
 # Coffee Pub Scribe - Blacksmith API Migration Plan
 
 ## **Overview**
-This document outlines the comprehensive migration plan for integrating Coffee Pub Scribe with the Coffee Pub Blacksmith API. The goal is to replace custom implementations with standardized Blacksmith utilities while preserving unique module functionality.
+This document outlines the comprehensive migration plan for integrating Coffee Pub Scribe with the Coffee Pub Blacksmith API. The goal is to replace custom implementations with standardized Blacksmith utilities while preserving unique module functionality. See the updated API docs for details and capabilities: [Blacksmith API Documentation](https://github.com/Drowbe/coffee-pub-blacksmith/wiki/Blacksmith-API).
 
 ## **Current State Analysis**
 
@@ -14,8 +14,8 @@ This document outlines the comprehensive migration plan for integrating Coffee P
 ### **What Needs Migration**
 🔄 **Console/Notification System**: Replace custom `postConsoleAndNotification`  
 🔄 **Settings Management**: Integrate with Blacksmith's safe settings system  
-🔄 **Constants System**: Migrate from `COFFEEPUB` to `BlacksmithConstants`  
-🔄 **Sound System**: Update sound playback to use Blacksmith utilities  
+🔄 **Constants & Assets**: Adopt `BlacksmithConstants` and the new Asset Lookup Tool for themes, sounds, images; keep `COFFEEPUB` only for backward compatibility  
+🔄 **Sound System**: Update sound playback to use Blacksmith utilities and asset constants  
 🔄 **Hook Management**: Replace custom hooks with `BlacksmithHookManager`  
 🔄 **Utility Functions**: Audit and replace with Blacksmith equivalents  
 
@@ -28,7 +28,7 @@ This document outlines the comprehensive migration plan for integrating Coffee P
 - Replace `game.settings.get()` calls with `BlacksmithUtils.getSettingSafely()`
 - Replace `game.settings.set()` calls with `BlacksmithUtils.setSettingSafely()`
 - Update settings registration to use Blacksmith patterns
-- Integrate theme choices with `BlacksmithConstants.arrThemeChoices`
+- Integrate theme choices with `BlacksmithConstants.arrThemeChoices` (or via Asset Lookup Tool-provided choices)
 
 **Files Affected**:
 - `scripts/settings.js` - Settings registration and management
@@ -57,13 +57,14 @@ This document outlines the comprehensive migration plan for integrating Coffee P
 
 ---
 
-### **Phase 3: Constants & Theme System (Medium Risk)**
-**Goal**: Migrate from custom constants to Blacksmith's centralized system
+### **Phase 3: Constants, Asset Lookup & Theme System (Low Risk)**
+**Goal**: Migrate from custom constants to Blacksmith's centralized constants and Asset Lookup Tool
 
 **Changes Required**:
-- Replace `COFFEEPUB.arrTHEMECHOICES` with `BlacksmithConstants.arrThemeChoices`
+- Replace `COFFEEPUB.arrTHEMECHOICES` with `BlacksmithConstants.arrThemeChoices` (backed by new id/value/path data)
 - Replace `COFFEEPUB.arrSOUNDCHOICES` with `BlacksmithConstants.arrSoundChoices`
-- Update theme switching logic to use Blacksmith constants
+- Use the Asset Lookup Tool to fetch assets by type/tags for dynamic needs (sounds, images, themes)
+- Maintain backward compatibility by tolerating existing `COFFEEPUB` references where necessary
 - Preserve custom theme CSS files (they're working well)
 
 **Files Affected**:
@@ -71,7 +72,7 @@ This document outlines the comprehensive migration plan for integrating Coffee P
 - `scripts/settings.js` - Theme choice arrays
 - `scripts/scribe.js` - Theme switching logic
 
-**Risk Level**: 🟡 **MEDIUM** - Need to ensure theme system continues working
+**Risk Level**: 🟢 **LOW** - Constants migration is completed in Blacksmith
 
 ---
 
@@ -80,7 +81,7 @@ This document outlines the comprehensive migration plan for integrating Coffee P
 
 **Changes Required**:
 - Replace custom `playSound()` with `BlacksmithUtils.playSound()`
-- Update sound file paths to use Blacksmith constants (when available)
+- Update sound/image references to use Blacksmith constants or Asset Lookup Tool results
 - Remove custom volume clamping and error handling
 - Integrate with Blacksmith's sound management
 
@@ -173,7 +174,7 @@ This document outlines the comprehensive migration plan for integrating Coffee P
 |-------|------------|---------|---------|
 | Settings | 🟢 LOW | Medium | Low |
 | Console | 🟢 LOW | High | Low |
-| Constants | 🟡 MEDIUM | Medium | Medium |
+| Constants | 🟢 LOW | Medium | Low |
 | Sound | 🟢 LOW | Low | Low |
 | Hooks | 🟡 MEDIUM | High | Medium |
 | Utilities | 🟡 MEDIUM | Medium | High |
@@ -240,6 +241,12 @@ Based on initial analysis, these functions may be valuable to the broader ecosys
 3. **Set up testing framework** for each phase
 4. **Establish rollback procedures** for each phase
 5. **Begin phased migration** following this plan
+
+---
+
+## Notes from Updated API Documentation
+
+- The constants migration is complete: all sound, image, theme, and volume constants are now exposed via `BlacksmithConstants`, with backward compatibility for `COFFEEPUB` where applicable. An Asset Lookup Tool is available to query assets by type and tags and to retrieve UI-ready choices. See: [Blacksmith API Documentation](https://github.com/Drowbe/coffee-pub-blacksmith/wiki/Blacksmith-API).
 
 ---
 
