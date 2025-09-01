@@ -5,15 +5,7 @@
 // -- Import MODULE variables --
 import { MODULE, SCRIBE, SCRIBE_HTML_EXPORT_CSS } from './const.js';
 
-// *** BEGIN: GLOBAL IMPORTS ***
-// *** These should be the same across all modules
-// -- Import the shared GLOBAL variables --
-import { COFFEEPUB, MODULE_AUTHOR } from './global.js';
-// -- Load the shared GLOBAL functions --
-import { registerBlacksmithUpdatedHook, resetModuleSettings, getOpenAIReplyAsHtml} from './global.js';
-// -- Global utilities --
-import { postConsoleAndNotification, rollCoffeePubDice, playSound, getActorId, getTokenImage, getPortraitImage, getTokenId, objectToString, stringToObject,trimString, generateFormattedDate, toSentenceCase, convertSecondsToString} from './global.js';
-// *** END: GLOBAL IMPORTS ***
+
 
 // -- Import special page variables --
 // Register settings so they can be loaded below.
@@ -249,8 +241,7 @@ Hooks.once('ready', async () => {
 // ===== REGISTER COMMON ============================================
 // ================================================================== 
 
-// Register the Blacksmith hook
-registerBlacksmithUpdatedHook();
+// Blacksmith hook registration is handled automatically by the API
 // Ensure the settings are registered before anything else
 registerSettings();
 
@@ -273,134 +264,155 @@ Hooks.once('init', async () => {
 Hooks.on("ready", () => {
     // Do these things after the client has loaded
     const cardTheme = BlacksmithUtils.getSettingSafely(MODULE.ID, 'cardTheme', 'theme-dark');
-        changeCSS(cardTheme);
-        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Setting Card theme...", "", false, false)
-});
-// ************************************
-// ** CHAT MESSAGE **
-// ************************************
-Hooks.on('renderChatMessage', (message, html) => {
-    // Hook into the chat message rendering
-    // Find the image button in the chat message
-    const imageButton = html.find('button.scribe-cards-illustration-button');
-    // Attach a click event listener to the image button
-    imageButton.click((event) => {
-        event.preventDefault();
-        showDialogueFromImageButton(event.currentTarget);
-    });
-});
+    changeCSS(cardTheme);
+    BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Setting Card theme...", "", false, false);
 
-// ************************************
-// ** HOOK: JOURNAL TOOLBAR
-// ************************************
-// Define the observer variable at the top level
-let observer;
+    // Register Blacksmith hooks
+    const hookManager = BlacksmithHookManager;
 
-Hooks.on("renderJournalPageSheet", (journalPageSheet, html, data) => {
-    // Check if the toolbarEnabled setting is true
-    const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
-    // If the toolbar isn't enabled, don't do anything
-    if (!toolbarEnabled) return;
-    
-    // Check if we're in edit mode - don't add toolbar if editing
-    const isEditMode = html.find('.editor').length > 0;
-    if (isEditMode) {
-        // Add double-click handler to images in the editor
-        const editor = html.find('.editor');
-        editor.on('dblclick', 'img', function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            // Find the Insert Image button in the same sheet
-            const insertImageButton = html.find('button[data-action="image"]:visible').first();
-            if (insertImageButton.length) {
-                insertImageButton[0].click();
-            }
-        });
-        return;
-    }
-
-    // If the user is a GM, process the blockquotes and add the toolbar
-    if (game.user.hasRole("GAMEMASTER")) {
-        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Is a GM", "", true, false);
-        // Process existing blockquotes and add the toolbar
-        addToolbarToBlockquotes(html);
-        
-        // Debounce function to limit how often addToolbarToBlockquotes is called
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
+    // Register chat message hook
+    const chatHookId = hookManager.registerHook({
+        name: 'renderChatMessage',
+        description: 'SCRIBE: Handle chat message illustration buttons',
+        context: 'scribe-chat-message',
+        priority: 5,
+        callback: (message, html) => {
+            // Hook into the chat message rendering
+            // Find the image button in the chat message
+            const imageButton = html.find('button.scribe-cards-illustration-button');
+            // Attach a click event listener to the image button
+            imageButton.click((event) => {
+                event.preventDefault();
+                showDialogueFromImageButton(event.currentTarget);
+            });
         }
-        
-        // Set up the MutationObserver with debounced callback
-        observer = new MutationObserver(debounce((mutations, observer) => {
-            // Check if we're in edit mode before processing mutations
-            const isCurrentlyEditing = html.find('.editor').length > 0;
-            if (!isCurrentlyEditing) {
-                addToolbarToBlockquotes(html);
-            }
-        }, 100));
-        
-        // Observe the target node for changes
-        observer.observe(html[0], { childList: true, subtree: true });
-    }
-    // Make the HTML available everywhere.
-    window.exportNarrationToHTML = exportNarrationToHTML;
-});
+    });
 
-// ************************************
-// ** HOOK: JOURNAL TITLEBAR EXPORT BUTTON
-// ************************************
-Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
-    // Check if the export button is enabled
-    const exportButtonEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonPrint', true);
-    if (!exportButtonEnabled) return;
-    
-    // Check if the user can view the journal (GM, Assistant GM, Trusted Players, or Players with permission)
-    if (!game.user.hasRole("GAMEMASTER") && !game.user.hasRole("ASSISTANT") && !game.user.hasRole("TRUSTED")) {
-        // For regular players, check if they have permission to view this specific journal
-        if (!journalSheet.object.testUserPermission(game.user, "LIMITED")) return;
-    }
-    
-    // Find the window header
-    const windowHeader = html.find('.window-header');
-    if (windowHeader.length === 0) return;
-    
-    // Check if the export button already exists
-    if (windowHeader.find('.scribe-journal-export-button').length > 0) return;
-    
-    // Create the export button as a DOM <a> element for compatibility
-    const exportButton = document.createElement('a');
-    exportButton.className = 'header-button control scribe-journal-export-button';
-    exportButton.href = '#';
-    exportButton.title = 'Export Journal';
-    exportButton.setAttribute('data-journal-id', journalSheet.object.id);
-    exportButton.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Export';
-    // Insert before the close button
-    const closeButton = windowHeader.find('.close');
-    if (closeButton.length > 0) {
-        closeButton.before(exportButton);
-    } else {
-        windowHeader.append(exportButton);
-    }
-    // Defensive: re-assign after a short delay to catch any Foundry re-renders
-    setTimeout(() => {
-        try {
-            const btn = windowHeader.find('.scribe-journal-export-button')[0];
-            if (btn) {
-                btn.onclick = (event) => {
+    // Register journal page sheet hook
+    const journalPageHookId = hookManager.registerHook({
+        name: 'renderJournalPageSheet',
+        description: 'SCRIBE: Add toolbar to journal page blockquotes',
+        context: 'scribe-journal-toolbar',
+        priority: 5,
+        callback: (journalPageSheet, html, data) => {
+            // Check if the toolbarEnabled setting is true
+            const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
+            // If the toolbar isn't enabled, don't do anything
+            if (!toolbarEnabled) return;
+            
+            // Check if we're in edit mode - don't add toolbar if editing
+            const isEditMode = html.find('.editor').length > 0;
+            if (isEditMode) {
+                // Add double-click handler to images in the editor
+                const editor = html.find('.editor');
+                editor.on('dblclick', 'img', function (event) {
                     event.preventDefault();
                     event.stopPropagation();
-                    openJournalForPrinting(journalSheet.object);
-                };
+                    // Find the Insert Image button in the same sheet
+                    const insertImageButton = html.find('button[data-action="image"]:visible').first();
+                    if (insertImageButton.length) {
+                        insertImageButton[0].click();
+                    }
+                });
+                return;
             }
-        } catch (e) {
-            // Fail silently if button is not present
+
+            // If the user is a GM, process the blockquotes and add the toolbar
+            if (game.user.hasRole("GAMEMASTER")) {
+                BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Is a GM", "", true, false);
+                // Process existing blockquotes and add the toolbar
+                addToolbarToBlockquotes(html);
+                
+                // Debounce function to limit how often addToolbarToBlockquotes is called
+                function debounce(func, wait) {
+                    let timeout;
+                    return function(...args) {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(this, args), wait);
+                    };
+                }
+                
+                // Set up the MutationObserver with debounced callback
+                observer = new MutationObserver(debounce((mutations, observer) => {
+                    // Check if we're in edit mode before processing mutations
+                    const isCurrentlyEditing = html.find('.editor').length > 0;
+                    if (!isCurrentlyEditing) {
+                        addToolbarToBlockquotes(html);
+                    }
+                }, 100));
+                
+                // Observe the target node for changes
+                observer.observe(html[0], { childList: true, subtree: true });
+            }
+            // Make the HTML available everywhere.
+            window.exportNarrationToHTML = exportNarrationToHTML;
         }
-    }, 50);
+    });
+
+    // Register journal sheet hook
+    const journalSheetHookId = hookManager.registerHook({
+        name: 'renderJournalSheet',
+        description: 'SCRIBE: Add export button to journal titlebar',
+        context: 'scribe-journal-export',
+        priority: 5,
+        callback: (journalSheet, html, data) => {
+            // Check if the export button is enabled
+            const exportButtonEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonPrint', true);
+            if (!exportButtonEnabled) return;
+            
+            // Check if the user can view the journal (GM, Assistant GM, Trusted Players, or Players with permission)
+            if (!game.user.hasRole("GAMEMASTER") && !game.user.hasRole("ASSISTANT") && !game.user.hasRole("TRUSTED")) {
+                // For regular players, check if they have permission to view this specific journal
+                if (!journalSheet.object.testUserPermission(game.user, "LIMITED")) return;
+            }
+            
+            // Find the window header
+            const windowHeader = html.find('.window-header');
+            if (windowHeader.length === 0) return;
+            
+            // Check if the export button already exists
+            if (windowHeader.find('.scribe-journal-export-button').length > 0) return;
+            
+            // Create the export button as a DOM <a> element for compatibility
+            const exportButton = document.createElement('a');
+            exportButton.className = 'header-button control scribe-journal-export-button';
+            exportButton.href = '#';
+            exportButton.title = 'Export Journal';
+            exportButton.setAttribute('data-journal-id', journalSheet.object.id);
+            exportButton.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Export';
+            // Insert before the close button
+            const closeButton = windowHeader.find('.close');
+            if (closeButton.length > 0) {
+                closeButton.before(exportButton);
+            } else {
+                windowHeader.append(exportButton);
+            }
+            // Defensive: re-assign after a short delay to catch any Foundry re-renders
+            setTimeout(() => {
+                try {
+                    const btn = windowHeader.find('.scribe-journal-export-button')[0];
+                    if (btn) {
+                        btn.onclick = (event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            openJournalForPrinting(journalSheet.object);
+                        };
+                    }
+                } catch (e) {
+                    // Fail silently if button is not present
+                }
+            }, 50);
+        }
+    });
+
+    BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Hooks registered successfully", { 
+        chat: chatHookId, 
+        journalPage: journalPageHookId, 
+        journalSheet: journalSheetHookId 
+    }, false, false);
 });
+// Define the observer variable at the top level
+let observer;
 
 // ================================================================== 
 // ===== FUNCTIONS ==================================================
@@ -980,7 +992,7 @@ function scrubHTML(clonedContent) {
 // ***************************************************
 function postUpdateToChat(title, page, folder, link) {
     // create a chat message with the journal entry link
-    const chatMessageContent = `<b style="text-transform: uppercase;">${trimString(title, 75)}</b><p>A new handout named <b>${page}</b> has been created in the <b>${folder}</b> folder.</p><p>${link}</p>`;
+    const chatMessageContent = `<b style="text-transform: uppercase;">${BlacksmithUtils.trimString(title, 75)}</b><p>A new handout named <b>${page}</b> has been created in the <b>${folder}</b> folder.</p><p>${link}</p>`;
     const chatData = {
         user: game.user.id,
         content: chatMessageContent,
