@@ -145,7 +145,7 @@ Hooks.once('ready', async () => {
         // Test sound playback
         try {
             // Use a direct sound path instead of COFFEEPUB constants
-            BlacksmithUtils.playSound('modules/coffee-pub-blacksmith/sounds/battlecry.mp3', 0.7);
+            BlacksmithUtils.playSound(COFFEEPUB.SOUNDBATTLECRY, COFFEEPUB.SOUNDVOLUMENORMAL);
             console.log('✅ API TEST | BLACKSMITH TEST: Sound playback test completed');
         } catch (error) {
             console.error('❌ API TEST | BLACKSMITH TEST: Sound playback test failed:', error);
@@ -263,18 +263,18 @@ registerSettings();
 // ************************************
 Hooks.once('init', async () => {
     await $(document).ready(() => {
-        postConsoleAndNotification("Initializing...", "", false, false, false) 
+
     });
-    postConsoleAndNotification("Hooks.once ends...", "", false, true, false) 
+
 });
 // ************************************
 // ** READY **
 // ************************************
 Hooks.on("ready", () => {
     // Do these things after the client has loaded
-    const cardTheme = game.settings.get(MODULE.ID, 'cardTheme');
+    const cardTheme = BlacksmithUtils.getSettingSafely(MODULE.ID, 'cardTheme', 'theme-dark');
         changeCSS(cardTheme);
-        postConsoleAndNotification("SCRIBE: Setting Card theme...", "", false, false, false) 
+        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Setting Card theme...", "", false, false)
 });
 // ************************************
 // ** CHAT MESSAGE **
@@ -298,7 +298,7 @@ let observer;
 
 Hooks.on("renderJournalPageSheet", (journalPageSheet, html, data) => {
     // Check if the toolbarEnabled setting is true
-    const toolbarEnabled = game.settings.get(MODULE.ID, 'toolbarEnabled');
+    const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
     // If the toolbar isn't enabled, don't do anything
     if (!toolbarEnabled) return;
     
@@ -321,7 +321,7 @@ Hooks.on("renderJournalPageSheet", (journalPageSheet, html, data) => {
 
     // If the user is a GM, process the blockquotes and add the toolbar
     if (game.user.hasRole("GAMEMASTER")) {
-        postConsoleAndNotification("SCRIBE: Is a GM", "", false, true, false);
+        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Is a GM", "", true, false);
         // Process existing blockquotes and add the toolbar
         addToolbarToBlockquotes(html);
         
@@ -355,7 +355,7 @@ Hooks.on("renderJournalPageSheet", (journalPageSheet, html, data) => {
 // ************************************
 Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
     // Check if the export button is enabled
-    const exportButtonEnabled = game.settings.get(MODULE.ID, 'toolbarButtonPrint');
+    const exportButtonEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonPrint', true);
     if (!exportButtonEnabled) return;
     
     // Check if the user can view the journal (GM, Assistant GM, Trusted Players, or Players with permission)
@@ -411,12 +411,12 @@ Hooks.on("renderJournalSheet", (journalSheet, html, data) => {
 // ************************************
 
 function addToolbarToBlockquotes(html) {
-    postConsoleAndNotification("SCRIBE: in addToolbarToBlockquotes and looking for blockquotes", "", false, true, false);
+    BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: in addToolbarToBlockquotes and looking for blockquotes", "", true, false);
     html.find("blockquote").each(function () {
-        postConsoleAndNotification("SCRIBE: in found the blockqupte and am adding the toolbar...", "", false, true, false);
+        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: in found the blockqupte and am adding the toolbar...", "", true, false);
         const blockquote = $(this);
         if (blockquote.find('.scribe-journal-buttons-wrapper').length) {
-            postConsoleAndNotification("SCRIBE: toolbar already exists, skipping...", "", false, true, false);
+            BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: toolbar already exists, skipping...", "", true, false);
             return;
         }
         var buttonHTMLOpen = '<div class="scribe-journal-buttons-wrapper"><div class="scribe-journal-buttons-container">';
@@ -429,7 +429,7 @@ function addToolbarToBlockquotes(html) {
         var toolbarEnabled = false; // Flag to check if any button is enabled
 
         // Check if toolbarButtonLabelEnabled is true
-        const toolbarButtonLabelEnabled = game.settings.get(MODULE.ID, 'toolbarButtonLabelEnabled');
+        const toolbarButtonLabelEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonLabelEnabled', true);
 
 
 
@@ -439,21 +439,21 @@ function addToolbarToBlockquotes(html) {
         const buttonsContainer = blockquote.find('.scribe-journal-buttons-container');
 
         // Check settings and append buttons accordingly
-        if (game.settings.get(MODULE.ID, 'toolbarButtonExport')) {
+        if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonExport', true)) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fas fa-cloud-arrow-down"></i> Export</button>';
             }
             buttonsContainer.append(buttonHTMLExport);
             toolbarEnabled = true;
         }
-        if (game.settings.get(MODULE.ID, 'toolbarButtonCopy')) {
+        if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonCopy', true)) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fas fa-clone"></i> Copy</button>';
             }
             buttonsContainer.append(buttonHTMLCopy);
             toolbarEnabled = true;
         }
-        if (game.settings.get(MODULE.ID, 'toolbarButtonHandout')) {
+        if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonHandout', true)) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLHandout = '<button class="scribe-journal-save-button-normal" type="button" title="Handout"><i class="fas fa-book-open"></i> Handout</button>';
             }
@@ -466,7 +466,7 @@ function addToolbarToBlockquotes(html) {
             const imgTag = $(this);
             const imgSrc = imgTag.attr('src');
             let buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fas fa-paintbrush-pencil"></i></button>`;
-            if (game.settings.get(MODULE.ID, 'toolbarButtonIllustration')) {
+            if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonIllustration', true)) {
                 if (toolbarButtonLabelEnabled) {
                     buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fas fa-paintbrush-pencil"></i> Illustration</button>`;
                 }
@@ -479,7 +479,7 @@ function addToolbarToBlockquotes(html) {
                             user: game.user.id,
                             content: `<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote id="scribe-card-illustration-wrapper"><h4>${strCardTitle}</h4><img src="${imgSrc}" alt="View Narrative Illustration"><button class="scribe-cards-illustration-button" data-image-url="${imgSrc}"><i class="fas fa-clone"></i>View Illustration</button></blockquote>`,
                         };
-                        playSound("modules/coffee-pub-blacksmith/sounds/book-open-02.mp3");
+                        BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK03, COFFEEPUB.SOUNDVOLUMENORMAL);
                         ChatMessage.create(chatImgData, {});
                     }
                 });
@@ -488,7 +488,7 @@ function addToolbarToBlockquotes(html) {
         });
 
         // Append the narration button if the setting is enabled
-        if (game.settings.get(MODULE.ID, 'toolbarButtonNarration')) {
+        if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonNarration', true)) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLNarration = `<button class="scribe-journal-narration-button-normal" type="button" title="Narration"><i class="fas fa-theater-masks"></i> Narration</button>`;
             }
@@ -518,7 +518,7 @@ function addToolbarToBlockquotes(html) {
                 content: content,
             };
             ChatMessage.create(chatData, {});
-            playSound("modules/coffee-pub-blacksmith/sounds/book-flip-01.mp3");
+            BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK01, COFFEEPUB.SOUNDVOLUMENORMAL);
             observer.disconnect(); // Ensure observer is accessible here
         });
 
@@ -528,12 +528,12 @@ function addToolbarToBlockquotes(html) {
             var cloneWithoutButtons = blockquote.clone().children().remove('.scribe-journal-buttons-wrapper').end();
             var content = "<blockquote>" + cloneWithoutButtons.html() + "</blockquote>";
             saveNarrationToJournal(content);
-            playSound("modules/coffee-pub-blacksmith/sounds/book-take-01.mp3");
+            BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK04, COFFEEPUB.SOUNDVOLUMENORMAL);
             observer.disconnect(); // Ensure observer is accessible here
         });
 
 
-        postConsoleAndNotification("SCRIBE: toolbar added.", "", false, true, false);
+        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: toolbar added.", "", true, false);
 
     });
 }
@@ -807,8 +807,8 @@ async function saveNarrationToJournal(message) {
     }
 
     // Set the Folder info
-    let folderName = game.settings.get(MODULE.ID, 'handoutFolder') || "Party Handouts";
-    let folderColor = game.settings.get(MODULE.ID, 'folderColor') || "#77274e";
+    let folderName = BlacksmithUtils.getSettingSafely(MODULE.ID, 'handoutFolder', 'Party Handouts') || 'Party Handouts';
+    let folderColor = BlacksmithUtils.getSettingSafely(MODULE.ID, 'folderColor', '#77274e') || '#77274e';
     let folder = game.folders.find(f => f.name === folderName);
     if (!folder) {
         folder = await Folder.create({ 
@@ -1094,7 +1094,7 @@ async function openJournalForPrinting(journalEntry) {
     newWindow.document.close();
     
     // Play sound effect
-    playSound("modules/coffee-pub-blacksmith/sounds/book-open-02.mp3");
+    BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK03, COFFEEPUB.SOUNDVOLUMENORMAL);
     
     ui.notifications.info(`Journal "${journalEntry.name}" opened for printing in a new tab.`);
 }
