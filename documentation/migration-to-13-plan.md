@@ -10,15 +10,17 @@
 
 ## Executive Summary
 
-This document outlines the migration plan for Coffee Pub Scribe from FoundryVTT v12 to v13. The migration focuses on removing jQuery dependencies and updating hook implementations to use native DOM APIs.
+This document outlines the migration plan for Coffee Pub Scribe from FoundryVTT v12 to v13. The migration focuses on removing jQuery dependencies, updating hook implementations to use native DOM APIs, and migrating Font Awesome 5 icons to Font Awesome 6.
 
 ### Key Findings
 
 - **Primary Migration Area:** jQuery removal from hooks and DOM manipulation
+- **Secondary Migration Area:** Font Awesome 5 to Font Awesome 6 icon updates
 - **Files Requiring Changes:** 2 files (`scribe.js`, `dialogue-illustration.js`)
 - **Hooks Affected:** 3 hooks (`renderChatMessage`, `renderJournalPageSheet`, `renderJournalSheet`)
 - **FormApplication Classes:** 1 class (`ImageFormApplication`)
-- **Breaking Changes Required:** jQuery removal, hook html parameter conversion
+- **Font Awesome Icons Used:** 5 unique icons requiring updates
+- **Breaking Changes Required:** jQuery removal, hook html parameter conversion, Font Awesome icon updates
 - **No Issues Found:** No `getSceneControlButtons`, `FilePicker`, or `token.target` usage
 
 ---
@@ -48,6 +50,267 @@ This document outlines the migration plan for Coffee Pub Scribe from FoundryVTT 
 - [x] Search for `getSceneControlButtons` hook implementations (none found)
 - [x] Search for deprecated APIs: `Token#target`, `FilePicker`, etc. (none found)
 - [x] Document all Application classes that extend `FormApplication` (1 found)
+- [x] Search for Font Awesome icon usage: `fas`, `far`, `fal` prefixes (5 icons found)
+
+---
+
+## Font Awesome 5 to 6 Migration
+
+### Overview
+
+FoundryVTT v13 migrated from Font Awesome 5 to Font Awesome 6, requiring updates to icon class names and prefixes.
+
+**Key Changes:**
+- `fas` prefix → `fa-solid` prefix
+- `far` prefix → `fa-regular` prefix
+- `fal` prefix → Not available in Foundry's bundled subset
+- Some icon names changed between FA5 and FA6
+- Foundry includes a curated subset of FA6 icons (not all icons available)
+
+### Icons Found in Codebase
+
+The following Font Awesome icons are used in Coffee Pub Scribe and require updates:
+
+| Current (FA5) | Location | FA6 Equivalent | Status |
+|---------------|----------|----------------|--------|
+| `fas fa-cloud-arrow-down` | `scribe.js` lines 180, 236, 254 | `fa-solid fa-cloud-arrow-down` | ✅ Icon name is valid FA6, just update prefix |
+| `fas fa-theater-masks` | `scribe.js` lines 234, 303 | `fa-solid fa-masks-theater` | ⚠️ Name changed in FA6 |
+| `fas fa-book-open` | `scribe.js` lines 235, 268 | `fa-solid fa-book-open` | ✅ Icon name unchanged, update prefix |
+| `fas fa-clone` | `scribe.js` lines 237, 261, 290 | `fa-solid fa-clone` | ✅ Icon name unchanged, update prefix |
+| `fas fa-paintbrush-pencil` | `scribe.js` lines 278, 281 | `fa-solid fa-paintbrush` or `fa-solid fa-pen` | ⚠️ Need to verify - may need alternative |
+
+### Icon Migration Details
+
+#### 1. `fa-cloud-arrow-down` ✅
+
+**Current Usage:** Export buttons (journal header, toolbar)
+- Lines 180, 236, 254
+
+**FA6 Equivalent:** `fa-solid fa-cloud-arrow-down`
+
+**Action Required:** Update prefix from `fas` to `fa-solid`
+
+```javascript
+// BEFORE (FA5)
+'<i class="fas fa-cloud-arrow-down"></i> Export'
+
+// AFTER (FA6)
+'<i class="fa-solid fa-cloud-arrow-down"></i> Export'
+```
+
+#### 2. `fa-theater-masks` ⚠️
+
+**Current Usage:** Narration button in toolbar
+- Lines 234, 303
+
+**FA6 Equivalent:** `fa-solid fa-masks-theater` (name reversed)
+
+**Action Required:** Update prefix and icon name
+
+```javascript
+// BEFORE (FA5)
+'<i class="fas fa-theater-masks"></i>'
+
+// AFTER (FA6)
+'<i class="fa-solid fa-masks-theater"></i>'
+```
+
+**Note:** Verify this icon is available in Foundry's bundled subset. If not available, consider alternative icons:
+- `fa-solid fa-masks-theater` (if available)
+- `fa-solid fa-theater-masks` (check if still supported)
+- Alternative: `fa-solid fa-mask` or `fa-solid fa-drama-masks`
+
+#### 3. `fa-book-open` ✅
+
+**Current Usage:** Handout button in toolbar
+- Lines 235, 268
+
+**FA6 Equivalent:** `fa-solid fa-book-open`
+
+**Action Required:** Update prefix from `fas` to `fa-solid`
+
+```javascript
+// BEFORE (FA5)
+'<i class="fas fa-book-open"></i> Handout'
+
+// AFTER (FA6)
+'<i class="fa-solid fa-book-open"></i> Handout'
+```
+
+#### 4. `fa-clone` ✅
+
+**Current Usage:** Copy button and illustration view button
+- Lines 237, 261, 290
+
+**FA6 Equivalent:** `fa-solid fa-clone`
+
+**Action Required:** Update prefix from `fas` to `fa-solid`
+
+```javascript
+// BEFORE (FA5)
+'<i class="fas fa-clone"></i>'
+
+// AFTER (FA6)
+'<i class="fa-solid fa-clone"></i>'
+```
+
+#### 5. `fa-paintbrush-pencil` ⚠️
+
+**Current Usage:** Illustration button in toolbar
+- Lines 278, 281
+
+**FA6 Verification Needed:** This icon name needs verification
+
+**Possible FA6 Equivalents:**
+- `fa-solid fa-paintbrush` (standard paintbrush icon)
+- `fa-solid fa-pen` (pen icon)
+- `fa-solid fa-pencil` (pencil icon - may not exist)
+- `fa-solid fa-pen-to-square` (edit icon)
+
+**Action Required:** Verify icon availability and choose appropriate replacement
+
+```javascript
+// BEFORE (FA5)
+'<i class="fas fa-paintbrush-pencil"></i>'
+
+// AFTER (FA6) - TO BE VERIFIED
+'<i class="fa-solid fa-paintbrush"></i>'
+// OR
+'<i class="fa-solid fa-pen"></i>'
+```
+
+**Recommendation:** Use `fa-solid fa-paintbrush` as closest match, or `fa-solid fa-pen` if paintbrush-pencil doesn't exist.
+
+### Migration Pattern
+
+**Search Pattern:**
+```bash
+# Find all Font Awesome usage
+grep -r "fas fa-" scripts/
+grep -r "far fa-" scripts/
+grep -r "fal fa-" scripts/
+```
+
+**Replacement Pattern:**
+```javascript
+// Global find and replace
+fas fa-  →  fa-solid fa-
+far fa-  →  fa-regular fa-
+```
+
+**Manual Updates Required:**
+- `fa-theater-masks` → `fa-masks-theater` (name changed)
+- `fa-paintbrush-pencil` → verify and replace with appropriate FA6 icon
+
+### Files Requiring Font Awesome Updates
+
+#### `scripts/scribe.js`
+
+**Line 180:** Export button in journal header
+```javascript
+// BEFORE
+exportButton.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Export';
+
+// AFTER
+exportButton.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Export';
+```
+
+**Lines 234-237:** Toolbar button HTML strings
+```javascript
+// BEFORE
+var buttonHTMLNarration = '<button ...><i class="fas fa-theater-masks"></i></button>';
+var buttonHTMLHandout = '<button ...><i class="fas fa-book-open"></i></button>';
+var buttonHTMLExport = '<button ...><i class="fas fa-cloud-arrow-down"></i></button>';
+var buttonHTMLCopy = '<button ...><i class="fas fa-clone"></i></button>';
+
+// AFTER
+var buttonHTMLNarration = '<button ...><i class="fa-solid fa-masks-theater"></i></button>';
+var buttonHTMLHandout = '<button ...><i class="fa-solid fa-book-open"></i></button>';
+var buttonHTMLExport = '<button ...><i class="fa-solid fa-cloud-arrow-down"></i></button>';
+var buttonHTMLCopy = '<button ...><i class="fa-solid fa-clone"></i></button>';
+```
+
+**Line 254:** Export button with label
+```javascript
+// BEFORE
+buttonHTMLExport = '<button ...><i class="fas fa-cloud-arrow-down"></i> Export</button>';
+
+// AFTER
+buttonHTMLExport = '<button ...><i class="fa-solid fa-cloud-arrow-down"></i> Export</button>';
+```
+
+**Line 261:** Copy button with label
+```javascript
+// BEFORE
+buttonHTMLCopy = '<button ...><i class="fas fa-clone"></i> Copy</button>';
+
+// AFTER
+buttonHTMLCopy = '<button ...><i class="fa-solid fa-clone"></i> Copy</button>';
+```
+
+**Line 268:** Handout button with label
+```javascript
+// BEFORE
+buttonHTMLHandout = '<button ...><i class="fas fa-book-open"></i> Handout</button>';
+
+// AFTER
+buttonHTMLHandout = '<button ...><i class="fa-solid fa-book-open"></i> Handout</button>';
+```
+
+**Lines 278, 281:** Illustration button
+```javascript
+// BEFORE
+let buttonHTMLIllustration = `<button ...><i class="fas fa-paintbrush-pencil"></i></button>`;
+
+// AFTER (VERIFY ICON NAME)
+let buttonHTMLIllustration = `<button ...><i class="fa-solid fa-paintbrush"></i></button>`;
+```
+
+**Line 290:** Illustration view button in chat
+```javascript
+// BEFORE
+content: `...<button ...><i class="fas fa-clone"></i>View Illustration</button>...`;
+
+// AFTER
+content: `...<button ...><i class="fa-solid fa-clone"></i>View Illustration</button>...`;
+```
+
+**Line 303:** Narration button with label
+```javascript
+// BEFORE
+buttonHTMLNarration = `<button ...><i class="fas fa-theater-masks"></i> Narration</button>`;
+
+// AFTER
+buttonHTMLNarration = `<button ...><i class="fa-solid fa-masks-theater"></i> Narration</button>`;
+```
+
+### Testing Checklist for Font Awesome Icons
+
+- [ ] All icons display correctly in journal toolbar
+- [ ] All icons display correctly in journal header
+- [ ] All icons display correctly in chat messages
+- [ ] Icons render with correct styling (solid style)
+- [ ] No broken/missing icon placeholders
+- [ ] Icon colors match theme correctly
+- [ ] Icons are properly sized
+- [ ] Verify `fa-masks-theater` is available in Foundry's FA6 subset
+- [ ] Verify `fa-paintbrush` or alternative is available
+- [ ] Test with all toolbar buttons enabled
+- [ ] Test with different button label configurations
+
+### Icon Verification Resources
+
+- [Font Awesome 6 Icons](https://fontawesome.com/icons) - Search for icon names
+- FoundryVTT v13 Release Notes - Check bundled icon subset
+- Foundry Discord #dev-support - Verify icon availability
+- Test in FoundryVTT v13 - Direct verification
+
+### Estimated Time
+
+- **Icon Audit & Research:** 1 hour
+- **Code Updates:** 1 hour
+- **Testing & Verification:** 1-2 hours
+- **Total:** 3-4 hours
 
 ---
 
@@ -207,27 +470,41 @@ const imageUrl = button.getAttribute('image-url') || button.dataset.imageUrl;
    - Remove `$(document).ready()` wrapper
    - Test functionality
 
-### Phase 3: Secondary Migration (2-3 hours)
+### Phase 3: Font Awesome Migration (3-4 hours)
+1. **Icon Research & Verification**
+   - Verify all icon names are valid in FA6
+   - Check Foundry's bundled icon subset
+   - Identify icon name changes (`fa-theater-masks` → `fa-masks-theater`)
+   - Verify `fa-paintbrush-pencil` replacement option
+
+2. **Icon Updates in scribe.js**
+   - Update all `fas` prefixes to `fa-solid`
+   - Update icon names where changed
+   - Replace `fa-paintbrush-pencil` with appropriate FA6 icon
+   - Test icon rendering
+
+### Phase 4: Secondary Migration (2-3 hours)
 1. **File 2: dialogue-illustration.js**
    - Convert jQuery data access
    - Add defensive jQuery detection to FormApplication (if needed)
    - Test dialogue functionality
 
-### Phase 4: Testing & Refinement (3-4 hours)
+### Phase 5: Testing & Refinement (3-4 hours)
 1. Run through full testing checklist
-2. Test all toolbar buttons
+2. Test all toolbar buttons (functionality and icon display)
 3. Test journal export functionality
 4. Test chat message interactions
-5. Test with different journal configurations
-6. Test edge cases (empty content, large journals, etc.)
+5. Test Font Awesome icons render correctly
+6. Test with different journal configurations
+7. Test edge cases (empty content, large journals, etc.)
 
-### Phase 5: Documentation & Release (1-2 hours)
+### Phase 6: Documentation & Release (1-2 hours)
 1. Update CHANGELOG
 2. Update README
 3. Create release notes
 4. Tag and release
 
-**Total Estimated Time:** 11-17 hours
+**Total Estimated Time:** 14-21 hours
 
 ---
 
