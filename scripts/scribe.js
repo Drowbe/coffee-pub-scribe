@@ -173,100 +173,126 @@ Hooks.on("ready", () => {
         }
     });
 
-    // Register journal sheet hook
+    // Function to add export button to a journal sheet
+    const addExportButtonToJournal = (sheetElement) => {
+        const exportButtonEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonPrint', true);
+        if (!exportButtonEnabled) return;
+        
+        const windowHeader = sheetElement.querySelector('.window-header');
+        if (!windowHeader) return;
+        if (windowHeader.querySelector('.scribe-journal-export-button')) return;
+        
+        // Find the journal entry from ui.windows (matching the sheet element)
+        let journalEntry = null;
+        if (ui.windows) {
+            try {
+                // Handle ui.windows - could be Map, Set, or object
+                let windowsIter;
+                if (ui.windows instanceof Map) {
+                    windowsIter = ui.windows.values();
+                } else if (ui.windows instanceof Set) {
+                    windowsIter = ui.windows.values();
+                } else if (typeof ui.windows.entries === 'function') {
+                    windowsIter = Array.from(ui.windows.entries()).map(([id, app]) => app);
+                } else {
+                    windowsIter = Object.values(ui.windows);
+                }
+                
+                for (const app of windowsIter) {
+                    if (app && app.element && (app.element === sheetElement || app.element.contains(sheetElement))) {
+                        if (app.object && app.object.documentName === 'JournalEntry') {
+                            journalEntry = app.object;
+                            break;
+                        }
+                    }
+                }
+            } catch (e) {
+                // Skip journal entry lookup if ui.windows structure is unexpected
+            }
+        }
+        
+        // Check permissions
+        if (journalEntry) {
+            if (!game.user.hasRole("GAMEMASTER") && !game.user.hasRole("ASSISTANT") && !game.user.hasRole("TRUSTED")) {
+                if (!journalEntry.testUserPermission(game.user, "LIMITED")) return;
+            }
+        }
+        
+        // Create export button
+        const exportButton = document.createElement('button');
+        exportButton.type = 'button';
+        exportButton.className = 'header-control icon fa-solid fa-cloud-arrow-down scribe-journal-export-button';
+        exportButton.setAttribute('data-tooltip', 'Export Journal');
+        exportButton.setAttribute('aria-label', 'Export Journal');
+        exportButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            if (journalEntry) {
+                openJournalForPrinting(journalEntry);
+            }
+        });
+        
+        // Insert before close button
+        const closeButton = windowHeader.querySelector('[data-action="close"]');
+        if (closeButton) {
+            closeButton.insertAdjacentElement('beforebegin', exportButton);
+        } else {
+            windowHeader.appendChild(exportButton);
+        }
+    };
+    
+    // Global MutationObserver to watch for journal sheets (v13 fix - hooks may not fire)
+    // Debounce to prevent excessive calls
+    let journalSheetCheckTimeout = null;
+    const checkJournalSheetsForExport = () => {
+        clearTimeout(journalSheetCheckTimeout);
+        journalSheetCheckTimeout = setTimeout(() => {
+            const journalSheets = document.querySelectorAll('.journal-sheet.journal-entry, form.journal-sheet.journal-entry');
+            journalSheets.forEach((sheet) => {
+                addExportButtonToJournal(sheet);
+            });
+        }, 100);
+    };
+    
+    const journalSheetObserver = new MutationObserver(() => {
+        checkJournalSheetsForExport();
+    });
+    
+    // Start observing
+    journalSheetObserver.observe(document.body, { childList: true, subtree: true });
+    
+    // Check immediately for any existing journal sheets
+    checkJournalSheetsForExport();
+    
+    // Register journal sheet hook as fallback (may not fire in v13 due to ApplicationV2)
     const journalSheetHookId = hookManager.registerHook({
         name: 'renderJournalSheet',
         description: 'SCRIBE: Add export button to journal titlebar',
         context: 'scribe-journal-export',
         priority: 5,
         callback: (journalSheet, html, data) => {
-            // Check if the export button is enabled
-            const exportButtonEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonPrint', true);
-            if (!exportButtonEnabled) return;
-            
-            // Check if the user can view the journal (GM, Assistant GM, Trusted Players, or Players with permission)
-            if (!game.user.hasRole("GAMEMASTER") && !game.user.hasRole("ASSISTANT") && !game.user.hasRole("TRUSTED")) {
-                // For regular players, check if they have permission to view this specific journal
-                if (!journalSheet.object.testUserPermission(game.user, "LIMITED")) return;
-            }
-            
             // v13: Detect and convert jQuery to native DOM if needed
             let nativeHtml = html;
             if (html && (html.jquery || typeof html.find === 'function')) {
                 nativeHtml = html[0] || html.get?.(0) || html;
             }
             
-            // Find the window header
-            const windowHeader = nativeHtml.querySelector('.window-header');
-            if (!windowHeader) return;
-            
-            // Check if the export button already exists
-            if (windowHeader.querySelector('.scribe-journal-export-button')) return;
-            
-            // Create the export button as a DOM <a> element for compatibility
-            const exportButton = document.createElement('a');
-            exportButton.className = 'header-button control scribe-journal-export-button';
-            exportButton.href = '#';
-            exportButton.title = 'Export Journal';
-            exportButton.setAttribute('data-journal-id', journalSheet.object.id);
-            exportButton.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Export';
-            // Insert before the close button
-            const closeButton = windowHeader.querySelector('.close');
-            if (closeButton) {
-                closeButton.insertAdjacentElement('beforebegin', exportButton);
-            } else {
-                windowHeader.appendChild(exportButton);
-            }
-            // Defensive: re-assign after a short delay to catch any Foundry re-renders
-            setTimeout(() => {
-                try {
-                    const btn = windowHeader.querySelector('.scribe-journal-export-button');
-                    if (btn) {
-                        btn.onclick = (event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            openJournalForPrinting(journalSheet.object);
-                        };
-                    }
-                } catch (e) {
-                    // Fail silently if button is not present
+            // Get sheet element
+            let sheetElement = nativeHtml;
+            if (journalSheet.element) {
+                let element = journalSheet.element;
+                if (element.jquery || typeof element.find === 'function') {
+                    element = element[0] || element.get?.(0) || element;
                 }
-            }, 50);
+                sheetElement = element || nativeHtml;
+            }
             
-            // Also add toolbar to blockquotes in the journal sheet
+            addExportButtonToJournal(sheetElement);
+            
+            // Also add toolbar to blockquotes
             if (game.user.hasRole("GAMEMASTER")) {
                 const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
                 if (toolbarEnabled) {
-                    // Search within the journal sheet element
-                    let sheetElement = nativeHtml;
-                    if (journalSheet.element) {
-                        let element = journalSheet.element;
-                        if (element.jquery || typeof element.find === 'function') {
-                            element = element[0] || element.get?.(0) || element;
-                        }
-                        sheetElement = element || nativeHtml;
-                    }
-                    // Multiple delays to catch different render timings
-                    setTimeout(() => {
-                        addToolbarToBlockquotes(sheetElement, null);
-                    }, 100);
-                    setTimeout(() => {
-                        addToolbarToBlockquotes(sheetElement, null);
-                    }, 500);
-                    setTimeout(() => {
-                        addToolbarToBlockquotes(sheetElement, null);
-                    }, 1000);
-                    
-                    // Also set up a MutationObserver on the journal sheet to catch dynamic content
-                    if (sheetElement && sheetElement !== document) {
-                        const sheetObserver = new MutationObserver((mutations) => {
-                            const hasBlockquotes = sheetElement.querySelectorAll('.journal-page-content blockquote, blockquote').length > 0;
-                            if (hasBlockquotes) {
-                                addToolbarToBlockquotes(sheetElement, null);
-                            }
-                        });
-                        sheetObserver.observe(sheetElement, { childList: true, subtree: true });
-                    }
+                    addToolbarToBlockquotes(sheetElement, null);
                 }
             }
         }
