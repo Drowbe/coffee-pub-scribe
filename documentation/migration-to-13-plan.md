@@ -28,22 +28,22 @@ This document outlines the migration plan for Coffee Pub Scribe from FoundryVTT 
 ## Pre-Migration Checklist
 
 ### 1. Lock Down v12 Release
-- [ ] Finalize and test current v12.1.2 version
-- [ ] Create git tag: `v12.1.2-FINAL`
-- [ ] Create GitHub release marking as final v12 version
-- [ ] Update README with v12 support end notice
-- [ ] Update CHANGELOG with final v12 release entry
+- [x] Finalize and test current v12.1.2 version
+- [x] Create git tag: `v12.1.2-FINAL`
+- [x] Create GitHub release marking as final v12 version
+- [x] Update README with v12 support end notice
+- [x] Update CHANGELOG with final v12 release entry
 
 ### 2. Update Module Configuration
-- [ ] Update `module.json` minimum Core Version to `"13.0.0"`
-- [ ] Update `module.json` verified Core Version to `"13.0.0"`
-- [ ] Update module version to `13.0.0`
-- [ ] Review and update compatibility notes
+- [x] Update `module.json` minimum Core Version to `"13.0.0"`
+- [x] Update `module.json` verified Core Version to `"13.0.0"`
+- [x] Update module version to `13.0.0`
+- [x] Review and update compatibility notes
 
 ### 3. Prepare Development Environment
-- [ ] Set up FoundryVTT v13 testing environment
-- [ ] Create feature branch: `v13-migration`
-- [ ] Document current functionality baseline
+- [x] Set up FoundryVTT v13 testing environment
+- [x] Create feature branch: `v13-migration`
+- [x] Document current functionality baseline
 
 ### 4. Audit Current Codebase
 - [x] Search for jQuery usage: `html.find`, `$()`, `.each()`, `.append()`, etc.
