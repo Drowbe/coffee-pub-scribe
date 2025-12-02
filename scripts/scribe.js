@@ -192,39 +192,39 @@ Hooks.on("ready", () => {
         icon.className = 'fa-solid fa-cloud-arrow-down';
         exportButton.appendChild(icon);
         exportButton.addEventListener('click', async (event) => {
-            console.log('[Coffee Pub Scribe] Export button clicked');
             event.preventDefault();
             event.stopPropagation();
             
-            // Find journal entry from the sheet form's data attribute or document
-            const form = sheetElement.closest('form.journal-sheet');
-            const journalId = form?.dataset?.entityId || form?.dataset?.documentId;
-            console.log('[Coffee Pub Scribe] Journal ID:', journalId);
+            // Extract journal ID from form's ID attribute (format: JournalEntrySheet5e-JournalEntry-{ID})
+            // sheetElement is already the form element
+            let journalId = null;
+            if (sheetElement.id) {
+                const idParts = sheetElement.id.split('-');
+                // The journal ID should be the last part after splitting by '-'
+                if (idParts.length > 0) {
+                    journalId = idParts[idParts.length - 1];
+                }
+            }
+            // Fallback: try dataset attributes
+            if (!journalId) {
+                journalId = sheetElement.dataset?.entityId || sheetElement.dataset?.documentId;
+            }
             
             if (journalId) {
                 const journalEntry = game.journal.get(journalId);
-                console.log('[Coffee Pub Scribe] Journal entry found:', !!journalEntry);
                 if (journalEntry) {
                     // Check permissions
                     if (game.user.hasRole("GAMEMASTER") || game.user.hasRole("ASSISTANT") || game.user.hasRole("TRUSTED") || journalEntry.testUserPermission(game.user, "LIMITED")) {
-                        console.log('[Coffee Pub Scribe] Opening window...');
                         // Open window immediately while still in user interaction context
                         const printWindow = window.open('', '_blank');
-                        console.log('[Coffee Pub Scribe] Window opened:', !!printWindow);
                         if (!printWindow) {
                             ui.notifications.error("Pop-up blocked. Please allow pop-ups for this site and try again.");
                             return;
                         }
                         // Now call async function and write content when ready
                         await openJournalForPrinting(journalEntry, printWindow);
-                    } else {
-                        console.log('[Coffee Pub Scribe] Permission check failed');
                     }
-                } else {
-                    console.log('[Coffee Pub Scribe] Journal entry not found');
                 }
-            } else {
-                console.log('[Coffee Pub Scribe] No journal ID found');
             }
         });
         
