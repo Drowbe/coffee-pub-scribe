@@ -182,52 +182,49 @@ Hooks.on("ready", () => {
         if (!windowHeader) return;
         if (windowHeader.querySelector('.scribe-journal-export-button')) return;
         
-        // Find the journal entry from ui.windows (matching the sheet element)
-        let journalEntry = null;
-        if (ui.windows) {
-            try {
-                // Handle ui.windows - could be Map, Set, or object
-                let windowsIter;
-                if (ui.windows instanceof Map) {
-                    windowsIter = ui.windows.values();
-                } else if (ui.windows instanceof Set) {
-                    windowsIter = ui.windows.values();
-                } else if (typeof ui.windows.entries === 'function') {
-                    windowsIter = Array.from(ui.windows.entries()).map(([id, app]) => app);
-                } else {
-                    windowsIter = Object.values(ui.windows);
-                }
-                
-                for (const app of windowsIter) {
-                    if (app && app.element && (app.element === sheetElement || app.element.contains(sheetElement))) {
-                        if (app.object && app.object.documentName === 'JournalEntry') {
-                            journalEntry = app.object;
-                            break;
-                        }
-                    }
-                }
-            } catch (e) {
-                // Skip journal entry lookup if ui.windows structure is unexpected
-            }
-        }
-        
-        // Check permissions
-        if (journalEntry) {
-            if (!game.user.hasRole("GAMEMASTER") && !game.user.hasRole("ASSISTANT") && !game.user.hasRole("TRUSTED")) {
-                if (!journalEntry.testUserPermission(game.user, "LIMITED")) return;
-            }
-        }
-        
-        // Create export button
+        // Create export button matching v13 header button structure
         const exportButton = document.createElement('button');
         exportButton.type = 'button';
-        exportButton.className = 'header-control icon fa-solid fa-cloud-arrow-down scribe-journal-export-button';
+        exportButton.className = 'header-control icon scribe-journal-export-button';
         exportButton.setAttribute('data-tooltip', 'Export Journal');
         exportButton.setAttribute('aria-label', 'Export Journal');
-        exportButton.addEventListener('click', (event) => {
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid fa-cloud-arrow-down';
+        exportButton.appendChild(icon);
+        exportButton.addEventListener('click', async (event) => {
+            console.log('[Coffee Pub Scribe] Export button clicked');
             event.preventDefault();
-            if (journalEntry) {
-                openJournalForPrinting(journalEntry);
+            event.stopPropagation();
+            
+            // Find journal entry from the sheet form's data attribute or document
+            const form = sheetElement.closest('form.journal-sheet');
+            const journalId = form?.dataset?.entityId || form?.dataset?.documentId;
+            console.log('[Coffee Pub Scribe] Journal ID:', journalId);
+            
+            if (journalId) {
+                const journalEntry = game.journal.get(journalId);
+                console.log('[Coffee Pub Scribe] Journal entry found:', !!journalEntry);
+                if (journalEntry) {
+                    // Check permissions
+                    if (game.user.hasRole("GAMEMASTER") || game.user.hasRole("ASSISTANT") || game.user.hasRole("TRUSTED") || journalEntry.testUserPermission(game.user, "LIMITED")) {
+                        console.log('[Coffee Pub Scribe] Opening window...');
+                        // Open window immediately while still in user interaction context
+                        const printWindow = window.open('', '_blank');
+                        console.log('[Coffee Pub Scribe] Window opened:', !!printWindow);
+                        if (!printWindow) {
+                            ui.notifications.error("Pop-up blocked. Please allow pop-ups for this site and try again.");
+                            return;
+                        }
+                        // Now call async function and write content when ready
+                        await openJournalForPrinting(journalEntry, printWindow);
+                    } else {
+                        console.log('[Coffee Pub Scribe] Permission check failed');
+                    }
+                } else {
+                    console.log('[Coffee Pub Scribe] Journal entry not found');
+                }
+            } else {
+                console.log('[Coffee Pub Scribe] No journal ID found');
             }
         });
         
@@ -1187,10 +1184,11 @@ function changeCSS(cssFile) {
 // ************************************
 // ** JOURNAL PRINT: OPEN FOR PRINTING
 // ************************************
-async function openJournalForPrinting(journalEntry) {
+async function openJournalForPrinting(journalEntry, printWindow) {
     // Get all pages from the journal
     const pages = journalEntry.pages.contents;
     if (!pages || pages.length === 0) {
+        if (printWindow) printWindow.close();
         ui.notifications.warn("This journal has no content to print.");
         return;
     }
@@ -1260,13 +1258,16 @@ async function openJournalForPrinting(journalEntry) {
     });
     htmlContent = tempDoc.documentElement.outerHTML;
 
-    // Open in new window/tab
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write(htmlContent);
-    newWindow.document.close();
-    
-    // Play sound effect
-    BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK03, COFFEEPUB.SOUNDVOLUMENORMAL);
-    
-    ui.notifications.info(`Journal "${journalEntry.name}" opened for printing in a new tab.`);
+    // Write content to the already-opened window
+    if (printWindow && !printWindow.closed) {
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+        
+        // Play sound effect
+        BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK03, COFFEEPUB.SOUNDVOLUMENORMAL);
+        
+        ui.notifications.info(`Journal "${journalEntry.name}" opened for printing in a new tab.`);
+    } else {
+        ui.notifications.error("Failed to open print window. Please check your pop-up blocker settings.");
+    }
 }
