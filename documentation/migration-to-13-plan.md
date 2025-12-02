@@ -286,17 +286,19 @@ buttonHTMLNarration = `<button ...><i class="fa-solid fa-masks-theater"></i> Nar
 
 ### Testing Checklist for Font Awesome Icons
 
-- [ ] All icons display correctly in journal toolbar
-- [ ] All icons display correctly in journal header
-- [ ] All icons display correctly in chat messages
-- [ ] Icons render with correct styling (solid style)
-- [ ] No broken/missing icon placeholders
-- [ ] Icon colors match theme correctly
-- [ ] Icons are properly sized
-- [ ] Verify `fa-masks-theater` is available in Foundry's FA6 subset
-- [ ] Verify `fa-paintbrush` or alternative is available
-- [ ] Test with all toolbar buttons enabled
-- [ ] Test with different button label configurations
+- [x] All icons display correctly in journal toolbar
+- [x] All icons display correctly in journal header
+- [x] All icons display correctly in chat messages
+- [x] Icons render with correct styling (solid style)
+- [x] No broken/missing icon placeholders
+- [x] Icon colors match theme correctly
+- [x] Icons are properly sized
+- [x] Verify `fa-masks-theater` is available in Foundry's FA6 subset
+- [x] Verify `fa-paintbrush` or alternative is available
+- [x] Test with all toolbar buttons enabled
+- [x] Test with different button label configurations
+
+**Status:** ✅ Complete - All Font Awesome icons working correctly with `"Font Awesome 6 Pro"` font-family
 
 ### Icon Verification Resources
 
@@ -470,18 +472,23 @@ const imageUrl = button.getAttribute('image-url') || button.dataset.imageUrl;
    - Remove `$(document).ready()` wrapper
    - Test functionality
 
-### Phase 3: Font Awesome Migration (3-4 hours)
-1. **Icon Research & Verification**
-   - Verify all icon names are valid in FA6
-   - Check Foundry's bundled icon subset
-   - Identify icon name changes (`fa-theater-masks` → `fa-masks-theater`)
-   - Verify `fa-paintbrush-pencil` replacement option
+### Phase 3: Font Awesome Migration (3-4 hours) ✅ COMPLETE
+1. **Icon Research & Verification** ✅
+   - ✅ Verified all icon names are valid in FA6
+   - ✅ Checked Foundry's bundled icon subset
+   - ✅ Identified icon name changes (`fa-theater-masks` → `fa-masks-theater`)
+   - ✅ Verified `fa-paintbrush-pencil` replacement option
 
-2. **Icon Updates in scribe.js**
-   - Update all `fas` prefixes to `fa-solid`
-   - Update icon names where changed
-   - Replace `fa-paintbrush-pencil` with appropriate FA6 icon
-   - Test icon rendering
+2. **Icon Updates in scribe.js** ✅
+   - ✅ Updated all `fas` prefixes to `fa-solid` (12 instances)
+   - ✅ Updated icon names where changed
+   - ✅ Replaced `fa-paintbrush-pencil` with `fa-paintbrush`
+   - ✅ Tested icon rendering - icons working correctly
+
+3. **CSS Font-Family Updates** ✅
+   - ✅ Updated all CSS files to use `"Font Awesome 6 Pro"` (7 instances)
+   - ✅ Verified font-family matches FoundryVTT v13 exactly
+   - ✅ Icons now display correctly
 
 ### Phase 4: Secondary Migration (2-3 hours)
 1. **File 2: dialogue-illustration.js**
