@@ -61,6 +61,9 @@ Hooks.on("ready", () => {
     const cardTheme = BlacksmithUtils.getSettingSafely(MODULE.ID, 'cardTheme', 'theme-dark');
     changeCSS(cardTheme);
     BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Setting Card theme...", "", false, false);
+    
+    // Make exportNarrationToHTML available globally immediately
+    window.exportNarrationToHTML = exportNarrationToHTML;
 
     // Register Blacksmith hooks
     const hookManager = BlacksmithHookManager;
@@ -166,8 +169,7 @@ Hooks.on("ready", () => {
                 // Observe the target node for changes (use native DOM element)
                 observer.observe(nativeHtml, { childList: true, subtree: true });
             }
-            // Make the HTML available everywhere.
-            window.exportNarrationToHTML = exportNarrationToHTML;
+            // exportNarrationToHTML is already set on window in ready hook
         }
     });
 
@@ -337,8 +339,7 @@ Hooks.on("ready", () => {
             // Observe the target node for changes (use native DOM element)
             observer.observe(nativeHtml, { childList: true, subtree: true });
         }
-        // Make the HTML available everywhere.
-        window.exportNarrationToHTML = exportNarrationToHTML;
+        // exportNarrationToHTML is already set on window in ready hook
     });
 });
 
@@ -499,8 +500,8 @@ function addToolbarToBlockquotes(html, journalPageSheet = null) {
         var buttonHTMLClose = '</div></div>';
         var buttonHTMLNarration = '<button class="scribe-journal-narration-button-normal" type="button" title="Narration"><i class="fa-solid fa-masks-theater"></i></button>';
         var buttonHTMLHandout = '<button class="scribe-journal-save-button-normal" type="button" title="Handout"><i class="fa-solid fa-book-open"></i></button>';
-        var buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fa-solid fa-cloud-arrow-down"></i></button>';
-        var buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fa-solid fa-clone"></i></button>';
+        var buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export"><i class="fa-solid fa-cloud-arrow-down"></i></button>';
+        var buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy"><i class="fa-solid fa-clone"></i></button>';
         var strChatCardTitle = "Handout Created";
         var toolbarEnabled = false; // Flag to check if any button is enabled
 
@@ -517,16 +518,30 @@ function addToolbarToBlockquotes(html, journalPageSheet = null) {
         // Check settings and append buttons accordingly
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonExport', true)) {
             if (toolbarButtonLabelEnabled) {
-                buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fa-solid fa-cloud-arrow-down"></i> Export</button>';
+                buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export"><i class="fa-solid fa-cloud-arrow-down"></i> Export</button>';
             }
             buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLExport);
+            // Add event listener for export button
+            const exportButton = buttonsContainer.querySelector('.scribe-journal-export-button-normal:last-child');
+            if (exportButton) {
+                exportButton.addEventListener('click', () => {
+                    exportNarrationToHTML();
+                });
+            }
             toolbarEnabled = true;
         }
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonCopy', true)) {
             if (toolbarButtonLabelEnabled) {
-                buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fa-solid fa-clone"></i> Copy</button>';
+                buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy"><i class="fa-solid fa-clone"></i> Copy</button>';
             }
             buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLCopy);
+            // Add event listener for copy button
+            const copyButton = buttonsContainer.querySelector('.scribe-journal-copy-button-normal:last-child');
+            if (copyButton) {
+                copyButton.addEventListener('click', () => {
+                    copyNarrationToClipboard(blockquote);
+                });
+            }
             toolbarEnabled = true;
         }
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonHandout', true)) {
@@ -600,7 +615,7 @@ function addToolbarToBlockquotes(html, journalPageSheet = null) {
                 };
                 ChatMessage.create(chatData, {});
                 BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK01, COFFEEPUB.SOUNDVOLUMENORMAL);
-                observer.disconnect(); // Ensure observer is accessible here
+                // Note: observer is managed in the hook callback, not here
             });
         }
 
@@ -617,7 +632,7 @@ function addToolbarToBlockquotes(html, journalPageSheet = null) {
                 var content = "<blockquote>" + cloneWithoutButtons.innerHTML + "</blockquote>";
                 saveNarrationToJournal(content);
                 BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK04, COFFEEPUB.SOUNDVOLUMENORMAL);
-                observer.disconnect(); // Ensure observer is accessible here
+                // Note: observer is managed in the hook callback, not here
             });
         }
 
@@ -818,31 +833,68 @@ async function resolveAllReferences(content) {
 // ** TOOLBAR: EXPORT NARRATIVE TO HTML   
 // ************************************
 async function exportNarrationToHTML() {
-    const filename = prompt("Enter the name for the HTML file to be created");
-    if (!filename) return;
+    // v13: Use Dialog instead of prompt()
+    new Dialog({
+        title: "Export Journal to HTML",
+        content: `
+            <form>
+                <div class="form-group">
+                    <label>Enter the name for the HTML file to be created:</label>
+                    <input type="text" id="filename-input" name="filename" placeholder="journal-export" style="width: 100%;">
+                </div>
+            </form>
+        `,
+        buttons: {
+            export: {
+                icon: '<i class="fa-solid fa-cloud-arrow-down"></i>',
+                label: "Export",
+                callback: async (html) => {
+                    // v13: Detect and convert jQuery to native DOM if needed
+                    let nativeHtml = html;
+                    if (html && (html.jquery || typeof html.find === 'function')) {
+                        nativeHtml = html[0] || html.get?.(0) || html;
+                    }
+                    
+                    const filenameInput = nativeHtml.querySelector('#filename-input');
+                    const filename = filenameInput ? filenameInput.value.trim() : '';
+                    
+                    if (!filename) {
+                        ui.notifications.warn("Please enter a filename.");
+                        return false; // Keep dialog open
+                    }
 
-    let divContent = document.querySelector('.journal-entry-page.text.level1');
-    let clonedContent = divContent.cloneNode(true);
+                    let divContent = document.querySelector('.journal-entry-page.text.level1');
+                    let clonedContent = divContent.cloneNode(true);
 
-    // Use setTimeout to break down the tasks
-    setTimeout(async () => {
-        // Call scrubHTML function to clean the HTML
-        clonedContent = scrubHTML(clonedContent);
-        
-        // Recursively resolve UUID and Embed references
-        let resolvedContent = await resolveAllReferences(clonedContent.innerHTML);
-        
-        let style = SCRIBE_HTML_EXPORT_CSS;
+                    // Use setTimeout to break down the tasks
+                    setTimeout(async () => {
+                        // Call scrubHTML function to clean the HTML
+                        clonedContent = scrubHTML(clonedContent);
+                        
+                        // Recursively resolve UUID and Embed references
+                        let resolvedContent = await resolveAllReferences(clonedContent.innerHTML);
+                        
+                        let style = SCRIBE_HTML_EXPORT_CSS;
 
-        let htmlContent = '<html>\n<head>\n<title>' + filename + '</title>\n<style>' + style + '</style>\n</head>\n<body>\n' + resolvedContent + '\n</body>\n</html>';
-        ui.notifications.info(`The file '${filename}.html' was saved to your default download location.`);
-        const blob = new Blob([htmlContent], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename + ".html";
-        link.click();
-    }, 0);
+                        let htmlContent = '<html>\n<head>\n<title>' + filename + '</title>\n<style>' + style + '</style>\n</head>\n<body>\n' + resolvedContent + '\n</body>\n</html>';
+                        ui.notifications.info(`The file '${filename}.html' was saved to your default download location.`);
+                        const blob = new Blob([htmlContent], { type: 'text/html' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = filename + ".html";
+                        link.click();
+                    }, 0);
+                }
+            },
+            cancel: {
+                icon: '<i class="fa-solid fa-times"></i>',
+                label: "Cancel"
+            }
+        },
+        default: "export",
+        close: () => {}
+    }).render(true);
 }
 
 
