@@ -51,10 +51,7 @@ registerSettings();
 // ** INIT **
 // ************************************
 Hooks.once('init', async () => {
-    await $(document).ready(() => {
-
-    });
-
+    // Document is already ready by the time init hook fires
 });
 // ************************************
 // ** READY **
@@ -76,13 +73,21 @@ Hooks.on("ready", () => {
         priority: 5,
         callback: (message, html) => {
             // Hook into the chat message rendering
+            // v13: Detect and convert jQuery to native DOM if needed
+            let nativeHtml = html;
+            if (html && (html.jquery || typeof html.find === 'function')) {
+                nativeHtml = html[0] || html.get?.(0) || html;
+            }
+            
             // Find the image button in the chat message
-            const imageButton = html.find('button.scribe-cards-illustration-button');
-            // Attach a click event listener to the image button
-            imageButton.click((event) => {
-                event.preventDefault();
-                showDialogueFromImageButton(event.currentTarget);
-            });
+            const imageButton = nativeHtml.querySelector('button.scribe-cards-illustration-button');
+            if (imageButton) {
+                // Attach a click event listener to the image button
+                imageButton.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    showDialogueFromImageButton(event.currentTarget);
+                });
+            }
         }
     });
 
@@ -93,23 +98,41 @@ Hooks.on("ready", () => {
         context: 'scribe-journal-toolbar',
         priority: 5,
         callback: (journalPageSheet, html, data) => {
+            console.log('SCRIBE: renderJournalPageSheet hook CALLED', { journalPageSheet, html, data });
             // Check if the toolbarEnabled setting is true
             const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
+            console.log('SCRIBE: toolbarEnabled =', toolbarEnabled);
             // If the toolbar isn't enabled, don't do anything
-            if (!toolbarEnabled) return;
+            if (!toolbarEnabled) {
+                console.log('SCRIBE: Toolbar is disabled, exiting');
+                return;
+            }
+            
+            // v13: Detect and convert jQuery to native DOM if needed
+            let nativeHtml = html;
+            if (html && (html.jquery || typeof html.find === 'function')) {
+                nativeHtml = html[0] || html.get?.(0) || html;
+            }
             
             // Check if we're in edit mode - don't add toolbar if editing
-            const isEditMode = html.find('.editor').length > 0;
+            const editor = nativeHtml.querySelector('.editor');
+            const isEditMode = editor !== null;
             if (isEditMode) {
-                // Add double-click handler to images in the editor
-                const editor = html.find('.editor');
-                editor.on('dblclick', 'img', function (event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    // Find the Insert Image button in the same sheet
-                    const insertImageButton = html.find('button[data-action="image"]:visible').first();
-                    if (insertImageButton.length) {
-                        insertImageButton[0].click();
+                // Add double-click handler to images in the editor using event delegation
+                editor.addEventListener('dblclick', (event) => {
+                    if (event.target.tagName === 'IMG') {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        // Find the Insert Image button in the same sheet
+                        const insertImageButtons = nativeHtml.querySelectorAll('button[data-action="image"]');
+                        // Find the first visible button
+                        for (const btn of insertImageButtons) {
+                            const style = window.getComputedStyle(btn);
+                            if (style.display !== 'none' && style.visibility !== 'hidden') {
+                                btn.click();
+                                break;
+                            }
+                        }
                     }
                 });
                 return;
@@ -119,7 +142,8 @@ Hooks.on("ready", () => {
             if (game.user.hasRole("GAMEMASTER")) {
                 BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Is a GM", "", true, false);
                 // Process existing blockquotes and add the toolbar
-                addToolbarToBlockquotes(html);
+                // Pass both nativeHtml and journalPageSheet to allow searching in sheet element
+                addToolbarToBlockquotes(nativeHtml, journalPageSheet);
                 
                 // Debounce function to limit how often addToolbarToBlockquotes is called
                 function debounce(func, wait) {
@@ -133,14 +157,14 @@ Hooks.on("ready", () => {
                 // Set up the MutationObserver with debounced callback
                 observer = new MutationObserver(debounce((mutations, observer) => {
                     // Check if we're in edit mode before processing mutations
-                    const isCurrentlyEditing = html.find('.editor').length > 0;
+                    const isCurrentlyEditing = nativeHtml.querySelector('.editor') !== null;
                     if (!isCurrentlyEditing) {
-                        addToolbarToBlockquotes(html);
+                        addToolbarToBlockquotes(nativeHtml, journalPageSheet);
                     }
                 }, 100));
                 
-                // Observe the target node for changes
-                observer.observe(html[0], { childList: true, subtree: true });
+                // Observe the target node for changes (use native DOM element)
+                observer.observe(nativeHtml, { childList: true, subtree: true });
             }
             // Make the HTML available everywhere.
             window.exportNarrationToHTML = exportNarrationToHTML;
@@ -164,12 +188,18 @@ Hooks.on("ready", () => {
                 if (!journalSheet.object.testUserPermission(game.user, "LIMITED")) return;
             }
             
+            // v13: Detect and convert jQuery to native DOM if needed
+            let nativeHtml = html;
+            if (html && (html.jquery || typeof html.find === 'function')) {
+                nativeHtml = html[0] || html.get?.(0) || html;
+            }
+            
             // Find the window header
-            const windowHeader = html.find('.window-header');
-            if (windowHeader.length === 0) return;
+            const windowHeader = nativeHtml.querySelector('.window-header');
+            if (!windowHeader) return;
             
             // Check if the export button already exists
-            if (windowHeader.find('.scribe-journal-export-button').length > 0) return;
+            if (windowHeader.querySelector('.scribe-journal-export-button')) return;
             
             // Create the export button as a DOM <a> element for compatibility
             const exportButton = document.createElement('a');
@@ -179,16 +209,16 @@ Hooks.on("ready", () => {
             exportButton.setAttribute('data-journal-id', journalSheet.object.id);
             exportButton.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Export';
             // Insert before the close button
-            const closeButton = windowHeader.find('.close');
-            if (closeButton.length > 0) {
-                closeButton.before(exportButton);
+            const closeButton = windowHeader.querySelector('.close');
+            if (closeButton) {
+                closeButton.insertAdjacentElement('beforebegin', exportButton);
             } else {
-                windowHeader.append(exportButton);
+                windowHeader.appendChild(exportButton);
             }
             // Defensive: re-assign after a short delay to catch any Foundry re-renders
             setTimeout(() => {
                 try {
-                    const btn = windowHeader.find('.scribe-journal-export-button')[0];
+                    const btn = windowHeader.querySelector('.scribe-journal-export-button');
                     if (btn) {
                         btn.onclick = (event) => {
                             event.preventDefault();
@@ -200,6 +230,43 @@ Hooks.on("ready", () => {
                     // Fail silently if button is not present
                 }
             }, 50);
+            
+            // Also add toolbar to blockquotes in the journal sheet
+            if (game.user.hasRole("GAMEMASTER")) {
+                const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
+                if (toolbarEnabled) {
+                    // Search within the journal sheet element
+                    let sheetElement = nativeHtml;
+                    if (journalSheet.element) {
+                        let element = journalSheet.element;
+                        if (element.jquery || typeof element.find === 'function') {
+                            element = element[0] || element.get?.(0) || element;
+                        }
+                        sheetElement = element || nativeHtml;
+                    }
+                    // Multiple delays to catch different render timings
+                    setTimeout(() => {
+                        addToolbarToBlockquotes(sheetElement, null);
+                    }, 100);
+                    setTimeout(() => {
+                        addToolbarToBlockquotes(sheetElement, null);
+                    }, 500);
+                    setTimeout(() => {
+                        addToolbarToBlockquotes(sheetElement, null);
+                    }, 1000);
+                    
+                    // Also set up a MutationObserver on the journal sheet to catch dynamic content
+                    if (sheetElement && sheetElement !== document) {
+                        const sheetObserver = new MutationObserver((mutations) => {
+                            const hasBlockquotes = sheetElement.querySelectorAll('.journal-page-content blockquote, blockquote').length > 0;
+                            if (hasBlockquotes) {
+                                addToolbarToBlockquotes(sheetElement, null);
+                            }
+                        });
+                        sheetObserver.observe(sheetElement, { childList: true, subtree: true });
+                    }
+                }
+            }
         }
     });
 
@@ -208,7 +275,138 @@ Hooks.on("ready", () => {
         journalPage: journalPageHookId, 
         journalSheet: journalSheetHookId 
     }, false, false);
+    
+    // Also register hooks directly with Foundry as fallback/test
+    // This ensures hooks fire even if Blacksmith hook manager has issues
+    Hooks.on('renderJournalPageSheet', (journalPageSheet, html, data) => {
+        console.log('SCRIBE: Direct Foundry hook renderJournalPageSheet CALLED', { journalPageSheet, html, data });
+        // Check if the toolbarEnabled setting is true
+        const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
+        if (!toolbarEnabled) return;
+        
+        // v13: Detect and convert jQuery to native DOM if needed
+        let nativeHtml = html;
+        if (html && (html.jquery || typeof html.find === 'function')) {
+            nativeHtml = html[0] || html.get?.(0) || html;
+        }
+        
+        // Check if we're in edit mode - don't add toolbar if editing
+        const editor = nativeHtml.querySelector('.editor');
+        const isEditMode = editor !== null;
+        if (isEditMode) {
+            // Add double-click handler to images in the editor using event delegation
+            editor.addEventListener('dblclick', (event) => {
+                if (event.target.tagName === 'IMG') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const insertImageButtons = nativeHtml.querySelectorAll('button[data-action="image"]');
+                    for (const btn of insertImageButtons) {
+                        const style = window.getComputedStyle(btn);
+                        if (style.display !== 'none' && style.visibility !== 'hidden') {
+                            btn.click();
+                            break;
+                        }
+                    }
+                }
+            });
+            return;
+        }
+
+        // If the user is a GM, process the blockquotes and add the toolbar
+        if (game.user.hasRole("GAMEMASTER")) {
+            BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Is a GM", "", true, false);
+            addToolbarToBlockquotes(nativeHtml, journalPageSheet);
+            
+            // Debounce function to limit how often addToolbarToBlockquotes is called
+            function debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+            
+            // Set up the MutationObserver with debounced callback
+            observer = new MutationObserver(debounce((mutations, observer) => {
+                const isCurrentlyEditing = nativeHtml.querySelector('.editor') !== null;
+                if (!isCurrentlyEditing) {
+                    addToolbarToBlockquotes(nativeHtml, journalPageSheet);
+                }
+            }, 100));
+            
+            // Observe the target node for changes (use native DOM element)
+            observer.observe(nativeHtml, { childList: true, subtree: true });
+        }
+        // Make the HTML available everywhere.
+        window.exportNarrationToHTML = exportNarrationToHTML;
+    });
 });
+
+// Global MutationObserver to watch for journal sheets and blockquotes
+// This is a fallback in case hooks don't fire
+let globalJournalObserver = null;
+
+Hooks.once('ready', () => {
+    // Set up a global observer to watch for journal sheets opening
+    globalJournalObserver = new MutationObserver((mutations) => {
+        // Check if any journal sheets are open
+        const journalSheets = document.querySelectorAll('.journal-sheet.journal-entry');
+        journalSheets.forEach((sheet) => {
+            // Check if toolbar is enabled
+            const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
+            if (!toolbarEnabled) return;
+            
+            // Only process if user is GM
+            if (!game.user.hasRole("GAMEMASTER")) return;
+            
+            // Check if we're in edit mode
+            const editor = sheet.querySelector('.editor');
+            const isEditMode = editor !== null;
+            if (isEditMode) return;
+            
+            // Search for blockquotes that don't have toolbar yet
+            const blockquotes = sheet.querySelectorAll('.journal-page-content blockquote, blockquote');
+            blockquotes.forEach((blockquote) => {
+                if (!blockquote.querySelector('.scribe-journal-buttons-wrapper')) {
+                    addToolbarToBlockquotes(sheet, null);
+                }
+            });
+        });
+    });
+    
+    // Observe the entire document for journal sheets
+    globalJournalObserver.observe(document.body, { 
+        childList: true, 
+        subtree: true,
+        attributes: false
+    });
+    
+    // Also trigger a check periodically for journal sheets that are already open
+    function checkJournalSheets() {
+        const journalSheets = document.querySelectorAll('.journal-sheet.journal-entry');
+        journalSheets.forEach((sheet) => {
+            const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
+            if (!toolbarEnabled) return;
+            if (!game.user.hasRole("GAMEMASTER")) return;
+            const editor = sheet.querySelector('.editor');
+            if (editor) return;
+            
+            const blockquotes = sheet.querySelectorAll('.journal-page-content blockquote, blockquote');
+            const blockquotesWithoutToolbar = Array.from(blockquotes).filter(bq => !bq.querySelector('.scribe-journal-buttons-wrapper'));
+            if (blockquotesWithoutToolbar.length > 0) {
+                console.log('SCRIBE: Found blockquotes without toolbar, adding...', blockquotesWithoutToolbar.length);
+                addToolbarToBlockquotes(sheet, null);
+            }
+        });
+    }
+    
+    // Check immediately
+    checkJournalSheets();
+    
+    // Then check periodically
+    setInterval(checkJournalSheets, 2000); // Check every 2 seconds
+});
+
 // Define the observer variable at the top level
 let observer;
 
@@ -220,12 +418,80 @@ let observer;
 // ** TOOLBAR: ADD TOOLBAR
 // ************************************
 
-function addToolbarToBlockquotes(html) {
+function addToolbarToBlockquotes(html, journalPageSheet = null) {
     BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: in addToolbarToBlockquotes and looking for blockquotes", "", true, false);
-    html.find("blockquote").each(function () {
+    
+    // Determine the root element to search in
+    let searchRoot = null;
+    
+    // If html is provided, try to use it (with jQuery detection)
+    if (html) {
+        let nativeHtml = html;
+        if (html.jquery || typeof html.find === 'function') {
+            nativeHtml = html[0] || html.get?.(0) || html;
+        }
+        searchRoot = nativeHtml;
+    }
+    
+    // If journalPageSheet is provided, try to get its element or the journal sheet element
+    if (!searchRoot && journalPageSheet) {
+        // Try journalPageSheet.element (the page sheet element)
+        if (journalPageSheet.element) {
+            let sheetElement = journalPageSheet.element;
+            if (sheetElement.jquery || typeof sheetElement.find === 'function') {
+                sheetElement = sheetElement[0] || sheetElement.get?.(0) || sheetElement;
+            }
+            searchRoot = sheetElement;
+        }
+        
+        // If still no root, try to get the parent journal sheet
+        if (!searchRoot && journalPageSheet.parent) {
+            let parentElement = journalPageSheet.parent.element;
+            if (parentElement) {
+                if (parentElement.jquery || typeof parentElement.find === 'function') {
+                    parentElement = parentElement[0] || parentElement.get?.(0) || parentElement;
+                }
+                searchRoot = parentElement;
+            }
+        }
+    }
+    
+    // Fallback: search in document for active journal page
+    if (!searchRoot) {
+        searchRoot = document.querySelector('.journal-entry-page.active, .journal-entry-page[data-page-id]');
+    }
+    
+    // Fallback: search in journal sheet form
+    if (!searchRoot) {
+        searchRoot = document.querySelector('.journal-sheet.journal-entry');
+    }
+    
+    // Final fallback: search entire document
+    if (!searchRoot) {
+        searchRoot = document;
+    }
+    
+    BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, `SCRIBE: Searching in ${searchRoot?.tagName || 'document'} for blockquotes`, "", true, false);
+    
+    // Search for blockquotes in journal-page-content (most specific)
+    let blockquotes = searchRoot.querySelectorAll(".journal-page-content blockquote");
+    BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, `SCRIBE: Found ${blockquotes.length} blockquote(s) in .journal-page-content`, "", true, false);
+    
+    // Fallback: search for any blockquotes in journal entry pages
+    if (blockquotes.length === 0) {
+        const journalEntryPages = searchRoot.querySelector('.journal-entry-pages') || searchRoot;
+        blockquotes = journalEntryPages.querySelectorAll("blockquote");
+        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, `SCRIBE: Found ${blockquotes.length} blockquote(s) in journal-entry-pages`, "", true, false);
+    }
+    
+    // Final fallback: search for any blockquotes anywhere
+    if (blockquotes.length === 0) {
+        blockquotes = searchRoot.querySelectorAll("blockquote");
+        BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, `SCRIBE: Found ${blockquotes.length} blockquote(s) anywhere in search root`, "", true, false);
+    }
+    blockquotes.forEach((blockquote) => {
         BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: in found the blockqupte and am adding the toolbar...", "", true, false);
-        const blockquote = $(this);
-        if (blockquote.find('.scribe-journal-buttons-wrapper').length) {
+        if (blockquote.querySelector('.scribe-journal-buttons-wrapper')) {
             BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: toolbar already exists, skipping...", "", true, false);
             return;
         }
@@ -245,46 +511,45 @@ function addToolbarToBlockquotes(html) {
 
 
         
-        blockquote.append(buttonHTMLOpen);
-        const buttonsContainer = blockquote.find('.scribe-journal-buttons-container');
+        blockquote.insertAdjacentHTML('beforeend', buttonHTMLOpen);
+        const buttonsContainer = blockquote.querySelector('.scribe-journal-buttons-container');
 
         // Check settings and append buttons accordingly
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonExport', true)) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fa-solid fa-cloud-arrow-down"></i> Export</button>';
             }
-            buttonsContainer.append(buttonHTMLExport);
+            buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLExport);
             toolbarEnabled = true;
         }
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonCopy', true)) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fa-solid fa-clone"></i> Copy</button>';
             }
-            buttonsContainer.append(buttonHTMLCopy);
+            buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLCopy);
             toolbarEnabled = true;
         }
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonHandout', true)) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLHandout = '<button class="scribe-journal-save-button-normal" type="button" title="Handout"><i class="fa-solid fa-book-open"></i> Handout</button>';
             }
-            buttonsContainer.append(buttonHTMLHandout);
+            buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLHandout);
             toolbarEnabled = true;
         }
 
         // Look for images and create buttons for them   
-        blockquote.find('img').each(function () {
-            const imgTag = $(this);
-            const imgSrc = imgTag.attr('src');
+        blockquote.querySelectorAll('img').forEach((imgTag) => {
+            const imgSrc = imgTag.getAttribute('src');
             let buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fa-solid fa-paintbrush"></i></button>`;
             if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonIllustration', true)) {
                 if (toolbarButtonLabelEnabled) {
                     buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fa-solid fa-paintbrush"></i> Illustration</button>`;
                 }
-                const $buttonHTMLIllustration = $(buttonHTMLIllustration);
-                buttonsContainer.append($buttonHTMLIllustration);
-                $buttonHTMLIllustration.click(() => {
+                buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLIllustration);
+                const buttonHTMLIllustrationEl = buttonsContainer.lastElementChild;
+                buttonHTMLIllustrationEl.addEventListener('click', () => {
                     if (imgSrc) {
-                        const strCardTitle = $buttonHTMLIllustration[0].textContent;
+                        const strCardTitle = buttonHTMLIllustrationEl.textContent;
                         const chatImgData = {
                             user: game.user.id,
                             content: `<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote id="scribe-card-illustration-wrapper"><h4>${strCardTitle}</h4><img src="${imgSrc}" alt="View Narrative Illustration"><button class="scribe-cards-illustration-button" data-image-url="${imgSrc}"><i class="fa-solid fa-clone"></i>View Illustration</button></blockquote>`,
@@ -302,45 +567,59 @@ function addToolbarToBlockquotes(html) {
             if (toolbarButtonLabelEnabled) {
                 buttonHTMLNarration = `<button class="scribe-journal-narration-button-normal" type="button" title="Narration"><i class="fa-solid fa-masks-theater"></i> Narration</button>`;
             }
-            buttonsContainer.append(buttonHTMLNarration);
+            buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLNarration);
             toolbarEnabled = true;
         }
 
         // After appending buttons, check if any buttons were added
         if (!toolbarEnabled) {
             // If no buttons are enabled, remove the entire toolbar wrapper
-            blockquote.find('.scribe-journal-buttons-wrapper').remove();
+            blockquote.querySelector('.scribe-journal-buttons-wrapper')?.remove();
             return;
         }
 
         // If buttons were added, ensure the toolbar is properly structured
-        buttonsContainer.append(buttonHTMLClose);
+        buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLClose);
 
         // Send the Narration to the Chat
-        const $sendButton = blockquote.find('.scribe-journal-narration-button-normal');
-        $sendButton.click(() => {
-            var cloneWithoutButtons = blockquote.clone().children().remove('.scribe-journal-buttons-wrapper').end();
-            // Build the content
-            // Add the code that we look for to hide the header button
-            var content = "<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote>" + cloneWithoutButtons.html() + "</blockquote>";
-            const chatData = {
-                user: game.user.id,
-                content: content,
-            };
-            ChatMessage.create(chatData, {});
-            BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK01, COFFEEPUB.SOUNDVOLUMENORMAL);
-            observer.disconnect(); // Ensure observer is accessible here
-        });
+        const sendButton = blockquote.querySelector('.scribe-journal-narration-button-normal');
+        if (sendButton) {
+            sendButton.addEventListener('click', () => {
+                // Clone blockquote and remove toolbar wrapper
+                const cloneWithoutButtons = blockquote.cloneNode(true);
+                const toolbarWrapper = cloneWithoutButtons.querySelector('.scribe-journal-buttons-wrapper');
+                if (toolbarWrapper) {
+                    toolbarWrapper.remove();
+                }
+                // Build the content
+                // Add the code that we look for to hide the header button
+                var content = "<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote>" + cloneWithoutButtons.innerHTML + "</blockquote>";
+                const chatData = {
+                    user: game.user.id,
+                    content: content,
+                };
+                ChatMessage.create(chatData, {});
+                BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK01, COFFEEPUB.SOUNDVOLUMENORMAL);
+                observer.disconnect(); // Ensure observer is accessible here
+            });
+        }
 
         // Save the Handout from the Journal from CHAT
-        const $saveButton = blockquote.find('.scribe-journal-save-button-normal');
-        $saveButton.click(() => {
-            var cloneWithoutButtons = blockquote.clone().children().remove('.scribe-journal-buttons-wrapper').end();
-            var content = "<blockquote>" + cloneWithoutButtons.html() + "</blockquote>";
-            saveNarrationToJournal(content);
-            BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK04, COFFEEPUB.SOUNDVOLUMENORMAL);
-            observer.disconnect(); // Ensure observer is accessible here
-        });
+        const saveButton = blockquote.querySelector('.scribe-journal-save-button-normal');
+        if (saveButton) {
+            saveButton.addEventListener('click', () => {
+                // Clone blockquote and remove toolbar wrapper
+                const cloneWithoutButtons = blockquote.cloneNode(true);
+                const toolbarWrapper = cloneWithoutButtons.querySelector('.scribe-journal-buttons-wrapper');
+                if (toolbarWrapper) {
+                    toolbarWrapper.remove();
+                }
+                var content = "<blockquote>" + cloneWithoutButtons.innerHTML + "</blockquote>";
+                saveNarrationToJournal(content);
+                BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK04, COFFEEPUB.SOUNDVOLUMENORMAL);
+                observer.disconnect(); // Ensure observer is accessible here
+            });
+        }
 
 
         BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: toolbar added.", "", true, false);
@@ -572,11 +851,16 @@ async function exportNarrationToHTML() {
 // ************************************
 
 function copyNarrationToClipboard(blockquote) {
-    let $blockquote = $(blockquote); // Ensure blockquote is a jQuery object
-    let blockquoteContent = $blockquote.clone().children().remove('.scribe-journal-buttons-wrapper').end();
+    // blockquote is already a DOM element
+    // Clone blockquote and remove toolbar wrapper
+    const blockquoteContent = blockquote.cloneNode(true);
+    const toolbarWrapper = blockquoteContent.querySelector('.scribe-journal-buttons-wrapper');
+    if (toolbarWrapper) {
+        toolbarWrapper.remove();
+    }
     let tempInput = document.createElement("textarea"); 
     tempInput.style = "position: absolute; left: -1000px; top: -1000px"; 
-    tempInput.value = `<blockquote>${blockquoteContent.html()}</blockquote>`; 
+    tempInput.value = `<blockquote>${blockquoteContent.innerHTML}</blockquote>`; 
     document.body.appendChild(tempInput); 
     tempInput.select(); 
     navigator.clipboard.writeText(tempInput.value).then(() => {

@@ -47,7 +47,7 @@ export class ImageFormApplication extends FormApplication {
 // ** Illustration Popup **
 
 export function showDialogueFromImageButton(button) {
-  const imageUrl = $(button).data('imageUrl');
+  const imageUrl = button.getAttribute('image-url') || button.dataset.imageUrl;
 
   if (imageUrl) {
     let img = new Image();

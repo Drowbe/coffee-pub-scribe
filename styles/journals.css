@@ -338,8 +338,9 @@
 }
 .scribe-journal-buttons-container {
 	width: auto;
-	margin: 0 auto;
-	display: inline;
+	margin: 0;
+	display: inline-block;
+	text-align: right;
 }
 
 /* Button: Standard Button */
@@ -348,6 +349,7 @@
 .scribe-journal-save-button-normal,
 .scribe-journal-illustration-button-normal,
 .scribe-journal-narration-button-normal {
+    display: inline-block;
     line-height: normal;
     padding-top: 4px;
 	padding-bottom: 4px;
@@ -362,6 +364,7 @@
 	text-transform: uppercase;
     text-align: center;
 	width: auto;
+	vertical-align: middle;
 }
 .scribe-journal-save-button-normal::after,
 .scribe-journal-illustration-button-normal::after,
