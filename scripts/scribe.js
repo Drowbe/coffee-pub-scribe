@@ -177,7 +177,7 @@ Hooks.on("ready", () => {
             exportButton.href = '#';
             exportButton.title = 'Export Journal';
             exportButton.setAttribute('data-journal-id', journalSheet.object.id);
-            exportButton.innerHTML = '<i class="fas fa-cloud-arrow-down"></i> Export';
+            exportButton.innerHTML = '<i class="fa-solid fa-cloud-arrow-down"></i> Export';
             // Insert before the close button
             const closeButton = windowHeader.find('.close');
             if (closeButton.length > 0) {
@@ -231,10 +231,10 @@ function addToolbarToBlockquotes(html) {
         }
         var buttonHTMLOpen = '<div class="scribe-journal-buttons-wrapper"><div class="scribe-journal-buttons-container">';
         var buttonHTMLClose = '</div></div>';
-        var buttonHTMLNarration = '<button class="scribe-journal-narration-button-normal" type="button" title="Narration"><i class="fas fa-theater-masks"></i></button>';
-        var buttonHTMLHandout = '<button class="scribe-journal-save-button-normal" type="button" title="Handout"><i class="fas fa-book-open"></i></button>';
-        var buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fas fa-cloud-arrow-down"></i></button>';
-        var buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fas fa-clone"></i></button>';
+        var buttonHTMLNarration = '<button class="scribe-journal-narration-button-normal" type="button" title="Narration"><i class="fa-solid fa-masks-theater"></i></button>';
+        var buttonHTMLHandout = '<button class="scribe-journal-save-button-normal" type="button" title="Handout"><i class="fa-solid fa-book-open"></i></button>';
+        var buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fa-solid fa-cloud-arrow-down"></i></button>';
+        var buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fa-solid fa-clone"></i></button>';
         var strChatCardTitle = "Handout Created";
         var toolbarEnabled = false; // Flag to check if any button is enabled
 
@@ -251,21 +251,21 @@ function addToolbarToBlockquotes(html) {
         // Check settings and append buttons accordingly
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonExport', true)) {
             if (toolbarButtonLabelEnabled) {
-                buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fas fa-cloud-arrow-down"></i> Export</button>';
+                buttonHTMLExport = '<button class="scribe-journal-export-button-normal" type="button" title="Export" onclick="exportNarrationToHTML()"><i class="fa-solid fa-cloud-arrow-down"></i> Export</button>';
             }
             buttonsContainer.append(buttonHTMLExport);
             toolbarEnabled = true;
         }
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonCopy', true)) {
             if (toolbarButtonLabelEnabled) {
-                buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fas fa-clone"></i> Copy</button>';
+                buttonHTMLCopy = '<button class="scribe-journal-copy-button-normal" type="button" title="Copy" onclick="copyNarrationToClipboard(this.closest(\'blockquote\'))"><i class="fa-solid fa-clone"></i> Copy</button>';
             }
             buttonsContainer.append(buttonHTMLCopy);
             toolbarEnabled = true;
         }
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonHandout', true)) {
             if (toolbarButtonLabelEnabled) {
-                buttonHTMLHandout = '<button class="scribe-journal-save-button-normal" type="button" title="Handout"><i class="fas fa-book-open"></i> Handout</button>';
+                buttonHTMLHandout = '<button class="scribe-journal-save-button-normal" type="button" title="Handout"><i class="fa-solid fa-book-open"></i> Handout</button>';
             }
             buttonsContainer.append(buttonHTMLHandout);
             toolbarEnabled = true;
@@ -275,10 +275,10 @@ function addToolbarToBlockquotes(html) {
         blockquote.find('img').each(function () {
             const imgTag = $(this);
             const imgSrc = imgTag.attr('src');
-            let buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fas fa-paintbrush-pencil"></i></button>`;
+            let buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fa-solid fa-paintbrush"></i></button>`;
             if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonIllustration', true)) {
                 if (toolbarButtonLabelEnabled) {
-                    buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fas fa-paintbrush-pencil"></i> Illustration</button>`;
+                    buttonHTMLIllustration = `<button image-url="${imgSrc}" class="scribe-journal-illustration-button-normal" type="button" title="Illustration"><i class="fa-solid fa-paintbrush"></i> Illustration</button>`;
                 }
                 const $buttonHTMLIllustration = $(buttonHTMLIllustration);
                 buttonsContainer.append($buttonHTMLIllustration);
@@ -287,7 +287,7 @@ function addToolbarToBlockquotes(html) {
                         const strCardTitle = $buttonHTMLIllustration[0].textContent;
                         const chatImgData = {
                             user: game.user.id,
-                            content: `<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote id="scribe-card-illustration-wrapper"><h4>${strCardTitle}</h4><img src="${imgSrc}" alt="View Narrative Illustration"><button class="scribe-cards-illustration-button" data-image-url="${imgSrc}"><i class="fas fa-clone"></i>View Illustration</button></blockquote>`,
+                            content: `<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote id="scribe-card-illustration-wrapper"><h4>${strCardTitle}</h4><img src="${imgSrc}" alt="View Narrative Illustration"><button class="scribe-cards-illustration-button" data-image-url="${imgSrc}"><i class="fa-solid fa-clone"></i>View Illustration</button></blockquote>`,
                         };
                         BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK03, COFFEEPUB.SOUNDVOLUMENORMAL);
                         ChatMessage.create(chatImgData, {});
@@ -300,7 +300,7 @@ function addToolbarToBlockquotes(html) {
         // Append the narration button if the setting is enabled
         if (BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarButtonNarration', true)) {
             if (toolbarButtonLabelEnabled) {
-                buttonHTMLNarration = `<button class="scribe-journal-narration-button-normal" type="button" title="Narration"><i class="fas fa-theater-masks"></i> Narration</button>`;
+                buttonHTMLNarration = `<button class="scribe-journal-narration-button-normal" type="button" title="Narration"><i class="fa-solid fa-masks-theater"></i> Narration</button>`;
             }
             buttonsContainer.append(buttonHTMLNarration);
             toolbarEnabled = true;

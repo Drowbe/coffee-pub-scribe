@@ -42,7 +42,7 @@
 }
 /* Narrative Title Icon */
 .message-content blockquote h4::before {
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 6 Pro";
     font-weight: 900;
     /* content: "\f02e"; /* Booknmark */
     content: "\f630"; /* Masks */
@@ -128,7 +128,7 @@
     border-radius: 0px;
 }
 .message-content blockquote h6 strong::before {
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 6 Pro";
     font-weight: 900;
     content: "\f086";
     font-size: 0.9em;
@@ -170,7 +170,7 @@
     border-radius: 0px;
 }
 .message-content blockquote h6 em::before {
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 6 Pro";
     font-weight: 900;
     content: "\f4ad";
     font-size: 0.9em;

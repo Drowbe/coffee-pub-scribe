@@ -44,10 +44,11 @@
 }
 
 /* Narrative Title Icon */
+/* NOTE: Font-family should match Foundry's FA6 font. Inspect any Foundry icon in DevTools to get exact name */
 .journal-page-content blockquote h4::before {
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 6 Pro";
     font-weight: 900;
-    content: "\f02e";
+    content: "\f02e"; /* Bookmark icon - verify codepoint in FA6 */
     font-size: 0.85em;
     margin-top: 0px;
     margin-bottom: 0px;
@@ -135,7 +136,7 @@
     border-radius: 0px;
 }
 .journal-page-content blockquote h6 strong::before {
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 6 Pro";
     font-weight: 900;
     content: "\f086";
     font-size: 0.9em;
@@ -177,7 +178,7 @@
     border-radius: 0px;
 }
 .journal-page-content blockquote h6 em::before {
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 6 Pro";
     font-weight: 900;
     content: "\f4ad";
     font-size: 0.9em;
