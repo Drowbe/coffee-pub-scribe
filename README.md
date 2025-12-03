@@ -1,6 +1,6 @@
 # Coffee Pub Scribe
 
-![Foundry v12](https://img.shields.io/badge/foundry-v12-green)
+![Foundry v13](https://img.shields.io/badge/foundry-v13-green)
 ![Latest Release](https://img.shields.io/github/v/release/Drowbe/coffee-pub-scribe)
 ![MIT License](https://img.shields.io/badge/license-MIT-blue)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Drowbe/coffee-pub-scribe/release.yml)

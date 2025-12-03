@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [13.0.0] - v13 Migration Begins
+## [13.0.0] - v13 Migration
 
 ### Important Notice
-- **v13 MIGRATION START:** This version begins the migration to FoundryVTT v13
+- **v13 MIGRATION COMPLETE:** This version fully supports FoundryVTT v13
 - **Breaking Changes:** This version requires FoundryVTT v13.0.0 or later
 - **v12 Support Ended:** v12.1.3-FINAL was the last version supporting FoundryVTT v12
 
@@ -17,12 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Module Version:** Bumped to 13.0.0 to align with FoundryVTT v13
 - **Compatibility:** Module now exclusively supports FoundryVTT v13
 
+### Fixed
+- **Journal Export Button Icon:** Fixed Font Awesome icon structure to use `<i>` element inside button (v13 compatibility)
+- **Journal Export Button Click Handler:** Fixed click event registration and journal ID extraction from form element
+- **Journal Export Window Opening:** Fixed popup blocker issues by opening window synchronously during user interaction
+- **Font Awesome Icons:** All icons now use FA6 `fa-solid` prefix for proper v13 compatibility
+
 ### Technical
-- **Migration Status:** Beginning v13 migration work
-- **Breaking Changes:** Will address v13 API changes including:
-  - `getSceneControlButtons` hook API changes (controls from array to object)
-  - jQuery removal (migrating to native DOM methods)
-  - ApplicationV2 framework migration (planned for future versions)
+- **jQuery Removal:** All DOM manipulation migrated to native JavaScript APIs
+- **Hook Updates:** Updated hook implementations to work with v13 ApplicationV2 framework
+- **MutationObserver Implementation:** Added MutationObserver as fallback for dynamic content rendering in v13
+- **Font Awesome 6 Migration:** All Font Awesome icons migrated from FA5 to FA6 format
 
 ## [12.1.3] - Final v12 Release
 
