@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [13.0.1] - Blacksmith bootstrap compatibility
+
+### Fixed
+- **Blacksmith registration:** Register via `coffee-pub-blacksmith` `module.api` (`registerModule` or `ModuleManager.registerModule`) instead of the `BlacksmithModuleManager` global at `ready`, avoiding `Cannot read properties of null (reading 'registerModule')` when Scribe’s `ready` ran before Blacksmith finished consumer setup.
+- **Blacksmith globals at `ready`:** Main and observer `ready` handlers now `await BlacksmithAPI.waitForReady()` when Blacksmith is active before using `BlacksmithUtils` or `BlacksmithHookManager`, matching Blacksmith’s documented bootstrap order.
+
+### Technical
+- **Fallback registration:** If `api` registration is unavailable, the module waits for Blacksmith readiness and retries `api`, then falls back to `BlacksmithModuleManager` for older builds.
+
+
 ## [13.0.0] - v13 Migration
 
 ### Important Notice

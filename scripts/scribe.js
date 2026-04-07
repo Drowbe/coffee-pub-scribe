@@ -14,18 +14,47 @@ import {ImageFormApplication, showDialogueFromImageButton} from './dialogue-illu
 // ===== BEGIN: REGISTER BLACKSMITH API =============================
 // ================================================================== 
 import { BlacksmithAPI } from '/modules/coffee-pub-blacksmith/api/blacksmith-api.js';
+
+function registerScribeWithBlacksmithApi(api) {
+    if (typeof api?.registerModule === 'function') {
+        api.registerModule(MODULE.ID, { name: MODULE.NAME, version: MODULE.VERSION });
+        return true;
+    }
+    if (typeof api?.ModuleManager?.registerModule === 'function') {
+        api.ModuleManager.registerModule(MODULE.ID, { name: MODULE.NAME, version: MODULE.VERSION });
+        return true;
+    }
+    return false;
+}
+
 // Register your module with Blacksmith (use 'ready' instead of 'init')
 Hooks.once('ready', async () => {
     try {
-        // Get the module manager
-        const moduleManager = BlacksmithModuleManager;
-        // Register your module
-        moduleManager.registerModule(MODULE.ID, {
-            name: MODULE.NAME,
-            version: MODULE.VERSION
-        });
-        // Log success
-        console.log('✅ Module ' + MODULE.NAME + ' registered with Blacksmith successfully');
+        const blacksmithMod = game.modules.get('coffee-pub-blacksmith');
+        if (!blacksmithMod?.active) return;
+
+        const api = blacksmithMod.api;
+        if (registerScribeWithBlacksmithApi(api)) {
+            console.log('✅ Module ' + MODULE.NAME + ' registered with Blacksmith successfully');
+            return;
+        }
+
+        await BlacksmithAPI.waitForReady();
+        if (registerScribeWithBlacksmithApi(blacksmithMod.api)) {
+            console.log('✅ Module ' + MODULE.NAME + ' registered with Blacksmith successfully');
+            return;
+        }
+
+        const moduleManager = globalThis.BlacksmithModuleManager;
+        if (moduleManager?.registerModule) {
+            moduleManager.registerModule(MODULE.ID, {
+                name: MODULE.NAME,
+                version: MODULE.VERSION
+            });
+            console.log('✅ Module ' + MODULE.NAME + ' registered with Blacksmith successfully');
+        } else {
+            console.error('❌ Failed to register ' + MODULE.NAME + ' with Blacksmith: no registerModule on api or BlacksmithModuleManager');
+        }
     } catch (error) {
         console.error('❌ Failed to register ' + MODULE.NAME + ' with Blacksmith:', error);
     }
@@ -56,7 +85,10 @@ Hooks.once('init', async () => {
 // ************************************
 // ** READY **
 // ************************************
-Hooks.on("ready", () => {
+Hooks.on("ready", async () => {
+    if (game.modules.get('coffee-pub-blacksmith')?.active) {
+        await BlacksmithAPI.waitForReady();
+    }
     // Do these things after the client has loaded
     const cardTheme = BlacksmithUtils.getSettingSafely(MODULE.ID, 'cardTheme', 'theme-dark');
     changeCSS(cardTheme);
@@ -370,7 +402,10 @@ Hooks.on("ready", () => {
 // This is a fallback in case hooks don't fire
 let globalJournalObserver = null;
 
-Hooks.once('ready', () => {
+Hooks.once('ready', async () => {
+    if (game.modules.get('coffee-pub-blacksmith')?.active) {
+        await BlacksmithAPI.waitForReady();
+    }
     // Set up a global observer to watch for journal sheets opening
     globalJournalObserver = new MutationObserver((mutations) => {
         // Check if any journal sheets are open
