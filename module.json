@@ -1,7 +1,7 @@
 {
   "id": "coffee-pub-scribe",
   "title": "Coffee Pub Scribe",
-  "description": "Enhanced journal and chat card formatting for snippets of narrative.",
+  "description": "Enhanced journal and chat card formatting to share snippets of narrative.",
   "version": "13.1.0",
 
   "manifest": "https://github.com/Drowbe/coffee-pub-scribe/releases/latest/download/module.json",
