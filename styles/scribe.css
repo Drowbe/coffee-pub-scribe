@@ -1,0 +1,21 @@
+/* ------------------------------------ */
+/* --- SCRIBE STYLES ------------------ */
+/* ------------------------------------ */
+
+/* One sheet, declared in module.json and always loaded.
+
+   There were seven before this: six theme-*.css files and cards.css. All six
+   differed from each other in nothing but the colours of one chat button, and
+   they were swapped in at runtime by changeCSS() -- which appended the chosen
+   sheet without ever removing the one module.json had already declared, so any
+   choice other than Dark and Stormy left two live at once.
+
+   Both the button and the swap are gone. Chat cards are compositions of
+   Blacksmith parts now, and Blacksmith owns their colour; the cardTheme setting
+   names one of its themes rather than a file here. What is left below is what
+   those themes always shared -- journals, dialogues, and the toolbar -- and it
+   was never themed. */
+
+@import "common.css";
+@import "journals.css";
+@import "dialogues.css";

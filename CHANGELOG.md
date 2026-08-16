@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [13.1.0] - Chat cards on the Blacksmith parts system
+
+### Changed
+- **Chat cards are compositions, not HTML.** All three of Scribe's chat outputs — the narration card, the illustration card, and the handout notice — are now described as data and posted through Blacksmith's `chatCards.post()`. Blacksmith owns the card wrapper, the theme, and the message header; Scribe names the parts and supplies their content.
+- **The narration blockquote is read, not forwarded.** Its conventions are Scribe's own — `h4` is the card title, `h5` titles the image beneath it, `hr` divides, and an `h6` is a line of conversation whose `<strong>` names the speaker and whose `<em>` marks an inner voice. Each is now mapped to the part that means the same thing (`header`, `image` with a caption, `section`, `panel` with a speech or thought icon) instead of being passed through as markup only Scribe could interpret. Runs of ordinary paragraphs still travel as `richtext`, which keeps the author's bold, italics and `@UUID` content links exactly as written.
+- **Card style setting now names a Blacksmith theme.** `cardTheme` holds a Blacksmith card theme id rather than one of Scribe's stylesheet names, and no longer requires a reload — the theme is read when a card is posted. A world updated from an earlier Scribe holds a stylesheet name here, which is not a valid id; those cards follow the world default until the GM picks again.
+- **Handout notice keeps the full journal title.** It is no longer trimmed to 75 characters on the way in. A card measures its own overflow and ellipsises with a tooltip carrying the whole text, which truncating first threw away.
+- **Handout notice links the journal as a document row** rather than interpolating `@UUID` syntax into a paragraph.
+
+### Fixed
+- **Theme switching no longer stacks stylesheets.** `changeCSS()` built a `<link>` whose id was one file path and tested for another, so the guard never matched and the sheet `module.json` had already declared was never removed. Any card style other than Dark and Stormy left two live at once, the later one winning. The whole mechanism is gone rather than repaired — cards take their theme from Blacksmith now.
+- **The illustration button survives a browser reload.** Its image URL travels as the card action's value and is handled by a handler registered at startup on every client, replacing the `data-image-url` attribute and the inline listener that only existed on the posting client's page. Buttons on messages posted before this version keep working.
+
+### Removed
+- **Seven stylesheets.** `cards.css` and the six `theme-*.css` files are gone, replaced by a single always-loaded `styles/scribe.css` carrying the journal, dialogue and common rules they all shared. The six themes differed from one another in nothing but the colours of one chat button, which no longer exists.
+- **The `coffeepub-hide-header` sentinel.** A card that wants no header simply does not compose one.
+
 ## [13.0.1] - Blacksmith bootstrap compatibility
 
 ### Fixed

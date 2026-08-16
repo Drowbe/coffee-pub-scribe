@@ -8,7 +8,9 @@ import { MODULE, SCRIBE, SCRIBE_HTML_EXPORT_CSS } from './const.js';
 // Register settings so they can be loaded below.
 import { registerSettings } from './settings.js';
 // -- Forms and Windows --
-import {ImageFormApplication, showDialogueFromImageButton} from './dialogue-illustration.js';
+import {ImageFormApplication, showDialogueFromImageButton, showIllustration} from './dialogue-illustration.js';
+// -- Chat cards, as compositions of Blacksmith parts --
+import { getChatCardsAPI, postCard } from './manager-cards.js';
 
 // ================================================================== 
 // ===== BEGIN: REGISTER BLACKSMITH API =============================
@@ -72,6 +74,209 @@ Hooks.once('ready', async () => {
 // Ensure the settings are registered before anything else
 registerSettings();
 
+// ==================================================================
+// ===== CHAT CARD ACTIONS ==========================================
+// ==================================================================
+
+/** Opens the illustration a card was posted with. */
+const ILLUSTRATION_VIEW_ACTION = 'view-illustration';
+
+/** The masks that have always marked a narration card. */
+const NARRATION_ICON = 'fa-solid fa-masks-theater';
+/** Someone speaking aloud. */
+const DIALOGUE_ICON = 'fa-solid fa-comments';
+/** Someone thinking. */
+const INNER_VOICE_ICON = 'fa-solid fa-comment-dots';
+
+/**
+ * Register card button handlers.
+ *
+ * A chat message is data on every client, so a handler cannot travel with
+ * the card — each client resolves it from its own registry when the card
+ * renders. That is why this belongs in `ready` on every client rather than
+ * beside the post, and why the button still works after a reload.
+ */
+function registerCardActions() {
+    const chatCards = getChatCardsAPI();
+    if (!chatCards) return;
+
+    chatCards.registerAction(MODULE.ID, ILLUSTRATION_VIEW_ACTION, async ({ value }) => {
+        showIllustration(value);
+    });
+}
+
+// ==================================================================
+// ===== NARRATION, AS PARTS ========================================
+// ==================================================================
+//
+// A narration blockquote is not arbitrary markup. It is the small format
+// documented in the README, and every element in it carries a meaning
+// Scribe already knows how to read:
+//
+//     <blockquote>
+//         <h4>Card Title</h4>
+//         <p>Some narrative here.</p>
+//         <h5>Image Title</h5>
+//         <img src="...">
+//         <hr>
+//         <h6><strong>Speaker</strong> "What they say."</h6>
+//         <h6><em>Inner Voice</em> "What they think."</h6>
+//     </blockquote>
+//
+// Passing the whole thing through `richtext` would hand Blacksmith markup
+// whose meaning only Scribe can see -- an <h6> would arrive as a small
+// heading rather than as a line of conversation. So the blockquote is walked
+// and each convention is emitted as the part that means the same thing.
+//
+// Ordinary paragraphs are the exception, and travel as `richtext` runs. That
+// markup was authored by a person in a journal page and carries their bold,
+// their italics and their @UUID content links; prose blocks would have to
+// invert the enricher to reproduce it, and would drop whatever it could not.
+
+/**
+ * One line of conversation.
+ *
+ * `<h6><strong>Name</strong> "words"</h6>` is someone speaking; the same with
+ * <em> is an inner voice. cards.css drew both as an icon, the name in bold, a
+ * separator, and then the line -- which is `panel`'s lead exactly, give or
+ * take the separator it writes for you.
+ *
+ * An <h6> naming nobody is a quote with no one to attribute it to.
+ *
+ * @param {HTMLElement} h6
+ * @returns {object|null} a part, or null when the line is empty
+ */
+function composeDialoguePart(h6) {
+    const lead = h6.firstElementChild;
+    const tag = lead?.tagName;
+    const speaking = tag === 'STRONG' || tag === 'B';
+    const thinking = tag === 'EM' || tag === 'I';
+    const speaker = (speaking || thinking) ? lead.textContent.trim() : '';
+
+    if (!speaker) {
+        const text = h6.textContent.trim();
+        return text ? { part: 'prose', blocks: [{ type: 'quote', text: { literal: text } }] } : null;
+    }
+
+    // Everything the speaker's name does not account for is what they said.
+    const line = Array.from(h6.childNodes)
+        .filter((node) => node !== lead)
+        .map((node) => node.textContent)
+        .join('')
+        .trim();
+
+    return {
+        part: 'panel',
+        icon: speaking ? DIALOGUE_ICON : INNER_VOICE_ICON,
+        label: { literal: speaker },
+        ...(line ? { intro: { literal: line } } : {})
+    };
+}
+
+/**
+ * Compose a narration blockquote into card parts.
+ *
+ * Every string reaching a part here came out of a journal page, so every one
+ * of them is a literal: escaped, and never read as marks or enricher syntax.
+ * The paragraph runs are the deliberate exception -- see the note above.
+ *
+ * @param {HTMLElement} blockquote - already stripped of its toolbar
+ * @returns {Array<object>} the composition, in render order
+ */
+function composeNarrationParts(blockquote) {
+    const parts = [];
+    let prose = [];
+    let caption = null;
+    let titled = false;
+
+    const flushProse = () => {
+        const html = prose.join('').trim();
+        prose = [];
+        if (html) parts.push({ part: 'richtext', html });
+    };
+
+    // An <h5> titles the image beneath it. One that titles nothing is read as
+    // a sub-heading, which is the closest thing a divider can say.
+    const flushCaption = () => {
+        if (caption) parts.push({ part: 'section', label: { literal: caption } });
+        caption = null;
+    };
+
+    const flush = () => { flushCaption(); flushProse(); };
+
+    for (const node of blockquote.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            if (!node.textContent.trim()) continue;
+            flushCaption();
+            prose.push(node.textContent);
+            continue;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) continue;
+
+        switch (node.tagName) {
+            case 'H4': {
+                flush();
+                const title = node.textContent.trim();
+                if (!title) break;
+                // The first <h4> is the card's title -- cards.css gave it a
+                // full-bleed bar, which is what the header part is. A later
+                // one is a heading partway down, which is a section.
+                parts.push(titled
+                    ? { part: 'section', icon: NARRATION_ICON, label: { literal: title } }
+                    : { part: 'header', icon: NARRATION_ICON, title: { literal: title } });
+                titled = true;
+                break;
+            }
+
+            case 'H5':
+                flush();
+                caption = node.textContent.trim() || null;
+                break;
+
+            case 'IMG': {
+                flushProse();
+                const src = node.getAttribute('src');
+                if (src) {
+                    parts.push({
+                        part: 'image',
+                        src,
+                        // Not a literal: `alt` is not one of the part's text
+                        // fields, so it is escaped on output rather than
+                        // processed, and an object would render as one.
+                        alt: caption || 'Narrative illustration',
+                        ...(caption ? { caption: { literal: caption } } : {})
+                    });
+                }
+                caption = null;
+                break;
+            }
+
+            case 'HR':
+                flush();
+                // No label: an unlabelled section is a dotted rule, which is
+                // exactly what cards.css gave <hr>.
+                parts.push({ part: 'section' });
+                break;
+
+            case 'H6': {
+                flush();
+                const dialogue = composeDialoguePart(node);
+                if (dialogue) parts.push(dialogue);
+                break;
+            }
+
+            default:
+                // Ordinary content -- paragraphs, lists, tables, anything the
+                // author reached for that Scribe has no convention about.
+                flushCaption();
+                prose.push(node.outerHTML);
+        }
+    }
+
+    flush();
+    return parts;
+}
+
 // ================================================================== 
 // ===== HOOKS ======================================================
 // ================================================================== 
@@ -90,20 +295,24 @@ Hooks.on("ready", async () => {
         await BlacksmithAPI.waitForReady();
     }
     // Do these things after the client has loaded
-    const cardTheme = BlacksmithUtils.getSettingSafely(MODULE.ID, 'cardTheme', 'theme-dark');
-    changeCSS(cardTheme);
-    BlacksmithUtils.postConsoleAndNotification(MODULE.NAME, "SCRIBE: Setting Card theme...", "", false, false);
-    
+    // Cards take their theme from Blacksmith at post time, so there is no
+    // stylesheet to swap here — see manager-cards.js.
+    registerCardActions();
+
     // Make exportNarrationToHTML available globally immediately
     window.exportNarrationToHTML = exportNarrationToHTML;
 
     // Register Blacksmith hooks
     const hookManager = BlacksmithHookManager;
 
-    // Register chat message hook
+    // Register chat message hook.
+    //
+    // Only pre-migration messages still hold a raw illustration button; cards
+    // posted now carry a registered action instead, which Blacksmith dispatches.
+    // This keeps the ones already sitting in a world's chat log clickable.
     const chatHookId = hookManager.registerHook({
         name: 'renderChatMessage',
-        description: 'SCRIBE: Handle chat message illustration buttons',
+        description: 'SCRIBE: Handle illustration buttons on pre-migration chat messages',
         context: 'scribe-chat-message',
         priority: 5,
         callback: (message, html) => {
@@ -620,16 +829,27 @@ function addToolbarToBlockquotes(html, journalPageSheet = null) {
                 }
                 buttonsContainer.insertAdjacentHTML('beforeend', buttonHTMLIllustration);
                 const buttonHTMLIllustrationEl = buttonsContainer.lastElementChild;
-                buttonHTMLIllustrationEl.addEventListener('click', () => {
-                    if (imgSrc) {
-                        const strCardTitle = buttonHTMLIllustrationEl.textContent;
-                        const chatImgData = {
-                            user: game.user.id,
-                            content: `<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote id="scribe-card-illustration-wrapper"><h4>${strCardTitle}</h4><img src="${imgSrc}" alt="View Narrative Illustration"><button class="scribe-cards-illustration-button" data-image-url="${imgSrc}"><i class="fa-solid fa-clone"></i>View Illustration</button></blockquote>`,
-                        };
-                        BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK03, COFFEEPUB.SOUNDVOLUMENORMAL);
-                        ChatMessage.create(chatImgData, {});
-                    }
+                buttonHTMLIllustrationEl.addEventListener('click', async () => {
+                    if (!imgSrc) return;
+                    BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK03, COFFEEPUB.SOUNDVOLUMENORMAL);
+                    // The image URL rides on the action rather than on a data
+                    // attribute: the handler is registered once at startup, so
+                    // the button keeps working after a browser reload.
+                    await postCard({
+                        type: 'illustration',
+                        parts: [
+                            { part: 'header', icon: 'fa-solid fa-image', title: 'Illustration' },
+                            { part: 'image', src: imgSrc, alt: 'Narrative illustration' },
+                            { part: 'actions', buttons: [{
+                                moduleId: MODULE.ID,
+                                action: ILLUSTRATION_VIEW_ACTION,
+                                label: 'View Illustration',
+                                icon: 'fa-solid fa-expand',
+                                value: imgSrc,
+                                variant: 'primary'
+                            }] }
+                        ]
+                    });
                 });
                 toolbarEnabled = true;
             }
@@ -657,22 +877,22 @@ function addToolbarToBlockquotes(html, journalPageSheet = null) {
         // Send the Narration to the Chat
         const sendButton = blockquote.querySelector('.scribe-journal-narration-button-normal');
         if (sendButton) {
-            sendButton.addEventListener('click', () => {
+            sendButton.addEventListener('click', async () => {
                 // Clone blockquote and remove toolbar wrapper
                 const cloneWithoutButtons = blockquote.cloneNode(true);
                 const toolbarWrapper = cloneWithoutButtons.querySelector('.scribe-journal-buttons-wrapper');
                 if (toolbarWrapper) {
                     toolbarWrapper.remove();
                 }
-                // Build the content
-                // Add the code that we look for to hide the header button
-                var content = "<span style='visibility: hidden'>coffeepub-hide-header</span><blockquote>" + cloneWithoutButtons.innerHTML + "</blockquote>";
-                const chatData = {
-                    user: game.user.id,
-                    content: content,
-                };
-                ChatMessage.create(chatData, {});
+
+                // Read the blockquote's own conventions into parts rather than
+                // handing the markup over whole -- an <h6> means a line of
+                // conversation, and only Scribe knows that.
+                const parts = composeNarrationParts(cloneWithoutButtons);
+                if (!parts.length) return;
+
                 BlacksmithUtils.playSound(COFFEEPUB.SOUNDEFFECTBOOK01, COFFEEPUB.SOUNDVOLUMENORMAL);
+                await postCard({ type: 'narration', parts });
                 // Note: observer is managed in the hook callback, not here
             });
         }
@@ -1111,8 +1331,7 @@ async function saveNarrationToJournal(message) {
     const strHandoutChatTitle = currentScene;
     const strHandoutChatPageTitle = pageName;
     const strHandoutChatFolder = folderName;
-    const strHandoutChatLink = "@UUID[JournalEntry." + journalEntry.id + "]{" + strHandoutChatPageTitle + "}";
-    postUpdateToChat(strHandoutChatTitle, strHandoutChatPageTitle, strHandoutChatFolder, strHandoutChatLink);
+    await postUpdateToChat(strHandoutChatTitle, strHandoutChatPageTitle, strHandoutChatFolder, journalEntry.uuid);
 }
 
 // ***************************************************
@@ -1182,38 +1401,42 @@ function scrubHTML(clonedContent) {
 // ***************************************************
 // ** UTILITY Post to Chat
 // ***************************************************
-function postUpdateToChat(title, page, folder, link) {
-    // create a chat message with the journal entry link
-    const chatMessageContent = `<b style="text-transform: uppercase;">${BlacksmithUtils.trimString(title, 75)}</b><p>A new handout named <b>${page}</b> has been created in the <b>${folder}</b> folder.</p><p>${link}</p>`;
-    const chatData = {
-        user: game.user.id,
-        content: chatMessageContent,
-    };
-    ChatMessage.create(chatData, {});
+/**
+ * Announce a newly created handout.
+ *
+ * Every name here was typed by someone — a scene, a page, a folder — so each
+ * is passed as a literal: escaped, and never read as marks or as enricher
+ * syntax. `mark` still emphasises them, because Blacksmith writes the tags
+ * around text it has already escaped.
+ *
+ * The title is not trimmed on the way in. A card measures its own overflow
+ * and ellipsises with a tooltip carrying the full text, which truncating
+ * first would throw away.
+ *
+ * @param {string} title - the journal the handout landed in
+ * @param {string} page - the new page's name
+ * @param {string} folder - the folder holding the journal
+ * @param {string} uuid - the journal entry, linked rather than interpolated
+ */
+async function postUpdateToChat(title, page, folder, uuid) {
+    await postCard({
+        type: 'handout-created',
+        parts: [
+            { part: 'header', icon: 'fa-solid fa-book-open', title: { literal: title } },
+            { part: 'prose', blocks: [
+                { type: 'paragraph', text: [
+                    'A new handout named ', { literal: page, mark: 'strong' },
+                    ' has been created in the ', { literal: folder, mark: 'strong' }, ' folder.'
+                ] }
+            ] },
+            // A real document link, built rather than written: the name is
+            // appended as a text node, so nothing in it can reach the anchor.
+            { part: 'rows', plain: true, items: [
+                { icon: 'fa-solid fa-book-open', uuid, label: page }
+            ] }
+        ]
+    });
     ui.notifications.info(`New journal entry '${page}' created successfully in '${folder}' inside the '${title}' journal.`);
-
-}
-
-// ***************************************************
-// ** UTILITY Change Css File
-// ***************************************************
-// DOES or SHOULD any other module use this?
-function changeCSS(cssFile) {
-    // OKay... this will work if we cn figure out the link index
-    var strCSSThemeFile = "/modules/coffee-pub-scribe/styles/" + cssFile + ".css";
-    var oldlink = "/modules/coffee-pub-scribe/styles/theme-default.css";
-    if (!document.getElementById(oldlink)) {
-        var head = document.getElementsByTagName('head')[0];
-        var link = document.createElement('link');
-        link.id = oldlink;
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = strCSSThemeFile;
-        link.media = 'all';
-        head.appendChild(link);
-    } else {
-        // Do nothing
-    }
 }
 
 // ************************************

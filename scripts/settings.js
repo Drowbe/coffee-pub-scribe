@@ -4,11 +4,34 @@
 
 // Grab the module data
 import { MODULE, SCRIBE  } from './const.js';
+import { BlacksmithAPI } from '/modules/coffee-pub-blacksmith/api/blacksmith-api.js';
 
 
 // ================================================================== 
 // ===== SETTINGS ===================================================
 // ================================================================== 
+
+/**
+ * Card theme choices for the settings dropdown, keyed by Blacksmith theme id.
+ *
+ * The empty key is Scribe's own: it means "whatever the world default is",
+ * which post() resolves at post time.
+ */
+async function getCardThemeChoices() {
+	const fallback = { '': 'Blacksmith Default' };
+	try {
+		const blacksmith = await BlacksmithAPI.get();
+		const chatCards = blacksmith?.chatCards;
+		if (typeof chatCards?.getThemeChoices !== 'function') {
+			console.warn(MODULE.ID + ': Blacksmith Chat Cards API not available, using fallback theme choices');
+			return fallback;
+		}
+		return { ...fallback, ...chatCards.getThemeChoices('card') };
+	} catch (error) {
+		console.error(MODULE.ID + ': Error getting card theme choices from Blacksmith:', error);
+		return fallback;
+	}
+}
 
 export const registerSettings = () => {
 	Hooks.once('ready', async() => {
@@ -37,22 +60,28 @@ export const registerSettings = () => {
 	});
 	// -------------------------------------
 
+	/**
+	 * Which Blacksmith card theme Scribe's chat cards wear.
+	 *
+	 * Theme IDs, not stylesheet names: chatCards.post() takes an id, and there
+	 * is no longer a file here to swap. The empty choice defers to whatever the
+	 * world has set as its default, which is also where a world updated from an
+	 * earlier Scribe lands — the value it stored ('theme-dark') is not an id,
+	 * so manager-cards.js drops it until the GM picks again.
+	 *
+	 * No reload: the theme is read when a card is posted, not when the page loads.
+	 */
+	const themeChoices = await getCardThemeChoices();
+
 	game.settings.register(MODULE.ID, 'cardTheme', {
 		name: MODULE.ID + '.cardTheme-Label',
 		hint: MODULE.ID + '.cardTheme-Hint',
 		scope: 'world',
 		config: true,
-		requiresReload: true,
+		requiresReload: false,
 		type: String,
-		default: 'theme-dark',
-		choices: {
-			'theme-none': 'None',
-			'theme-earth': 'Brown Earth',
-			'theme-dark': 'Dark and Stormy',
-			'theme-red': 'Red Wine',
-			'theme-blue': 'Blue Velvet',
-			'theme-green': 'Green Moss',
-		}
+		default: '',
+		choices: themeChoices
 	});
 
 

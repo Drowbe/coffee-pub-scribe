@@ -46,24 +46,43 @@ export class ImageFormApplication extends FormApplication {
 
 // ** Illustration Popup **
 
-export function showDialogueFromImageButton(button) {
-  const imageUrl = button.getAttribute('image-url') || button.dataset.imageUrl;
+/**
+ * Open an illustration at its own size.
+ *
+ * Takes the URL rather than an element: the chat card delivers it as an
+ * action value, which survives a browser reload where an inline listener
+ * on a button does not.
+ *
+ * @param {string} imageUrl
+ */
+export function showIllustration(imageUrl) {
+  if (!imageUrl) return;
 
-  if (imageUrl) {
-    let img = new Image();
-    img.onload = async function () {
-      let options = {
-        width: Math.min(this.naturalWidth, window.innerWidth * 0.7),
-        height: Math.min(this.naturalHeight, window.innerHeight * 0.7),
-        resizable: true
-      };
-      
-      const form = new ImageFormApplication(img, options);
-      playSound("book-open-02");
-      form.render(true);
+  let img = new Image();
+  img.onload = async function () {
+    let options = {
+      width: Math.min(this.naturalWidth, window.innerWidth * 0.7),
+      height: Math.min(this.naturalHeight, window.innerHeight * 0.7),
+      resizable: true
     };
-    img.src = imageUrl;
-  }
+
+    const form = new ImageFormApplication(img, options);
+    playSound("book-open-02");
+    form.render(true);
+  };
+  img.src = imageUrl;
+}
+
+/**
+ * The same popup, reached from a raw button.
+ *
+ * Only pre-migration chat messages still carry one of these — cards posted
+ * now use the registered action instead.
+ *
+ * @param {HTMLElement} button
+ */
+export function showDialogueFromImageButton(button) {
+  showIllustration(button.getAttribute('image-url') || button.dataset.imageUrl);
 }
 
 // ** Play Sounds **
