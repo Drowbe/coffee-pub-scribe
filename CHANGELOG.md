@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **The illustration button survives a browser reload.** Its image URL travels as the card action's value and is handled by a handler registered at startup on every client, replacing the `data-image-url` attribute and the inline listener that only existed on the posting client's page. Buttons on messages posted before this version keep working.
 
 ### Removed
-- **Seven stylesheets.** `cards.css` and the six `theme-*.css` files are gone, replaced by a single always-loaded `styles/scribe.css` carrying the journal, dialogue and common rules they all shared. The six themes differed from one another in nothing but the colours of one chat button, which no longer exists.
+- **Seven stylesheets.** `cards.css` and the six `theme-*.css` files are gone, replaced by a single always-loaded `styles/default.css` — the same entry point Blacksmith, Bibliosoph and Squire use — carrying the journal, dialogue and common rules they all shared. **Foundry must be restarted, not just reloaded:** the `styles` entry in `module.json` is read when the server builds its module manifest, so a browser refresh still asks for the deleted `theme-dark.css` and leaves the journal toolbar unstyled. The six themes differed from one another in nothing but the colours of one chat button, which no longer exists.
 - **The `coffeepub-hide-header` sentinel.** A card that wants no header simply does not compose one.
 
 ## [13.0.1] - Blacksmith bootstrap compatibility

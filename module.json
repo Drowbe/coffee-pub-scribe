@@ -55,7 +55,7 @@
     }
   ],
   "styles": [
-    "styles/scribe.css"
+    "styles/default.css"
   ],
   "esmodules": [
     "scripts/scribe.js"
