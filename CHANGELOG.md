@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [13.1.1]
 
 ### Changed
 - **Documentation adopts the suite-wide standard.** `documentation/` now carries `home.md`, `known-issues.md`, `TODO.md`, `architecture/`, `userguides/` and `assets/`, and the verification backlog moved to `testing/` at the repository root where the publisher cannot reach it. Two architecture documents were written from the code: `architecture-toolbar-discovery.md` covers the four overlapping discovery paths and the idempotence guards that keep them from stacking toolbars, and `architecture-narration-format.md` covers the blockquote grammar and its mapping to Blacksmith card parts. Seven user guides were written from `lang/en.json` and the source -- getting started, the journal toolbar, writing a scene, sharing to chat, handouts, exporting and printing, and settings -- covering every feature a user would name. None has been walked in a running world; `TODO.md` records which claims in each are unverified. Verified with `node tools/check-docs-structure.mjs`, which reports one expected failure described below and nothing else.
