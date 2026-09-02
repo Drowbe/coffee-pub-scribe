@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Changed
+- **Documentation adopts the suite-wide standard.** `documentation/` now carries `home.md`, `known-issues.md`, `TODO.md`, `architecture/`, `userguides/` and `assets/`, and the verification backlog moved to `testing/` at the repository root where the publisher cannot reach it. Two architecture documents were written from the code: `architecture-toolbar-discovery.md` covers the four overlapping discovery paths and the idempotence guards that keep them from stacking toolbars, and `architecture-narration-format.md` covers the blockquote grammar and its mapping to Blacksmith card parts. Seven user guides were written from `lang/en.json` and the source -- getting started, the journal toolbar, writing a scene, sharing to chat, handouts, exporting and printing, and settings -- covering every feature a user would name. None has been walked in a running world; `TODO.md` records which claims in each are unverified. Verified with `node tools/check-docs-structure.mjs`, which reports one expected failure described below and nothing else.
+- **README rewritten as a product page** and now carries the suite's AI-assistance disclosure between its canonical markers.
+
+### Known
+- **The documentation checker exits non-zero, and the cause is upstream rather than here.** It flags
+  `documentation/userguides/userguide-export.md:39`, the heading `## Open a whole journal for
+  printing`, as a work-shaped section heading. It is not one. The check matches the word "Open" as
+  the adjective in "Open work" and catches the verb, so it fires on exactly the task-shaped headings
+  the user-guide rules require. Blacksmith has fixed this; the fix is not committed yet, so Scribe
+  carries the last committed version of the checker. Scribe passes against the fixed version with no
+  change to this repository. The heading is deliberately not reworded, because rewording it to satisfy
+  a known upstream bug would produce a worse heading. Re-copy `tools/check-docs-structure.mjs` from
+  Blacksmith once the fix lands and this clears itself.
+
+### Added
+- **Wiki publishing.** The five publisher files were copied from Blacksmith unaltered, `.gitattributes` first. Verified by comparing staged blobs against the hub's `HEAD`; all five are byte-identical. `sync-wiki.yml` triggers on `[main, master]`, so Scribe's `main` is covered.
+
+### Removed
+- **Five documents that were not a kind.** `migration-global.md` was a fork of a suite-wide guide that the hub does not itself carry, and had drifted to 1242 lines against Monarch's 762. `migration-to-13-plan.md` and `migration-verification-report.md` described a completed migration, which is history and belongs here. `journal-toolbar-v13-migration.md` was a generic how-to for other modules; its durable content was rewritten against the current code as `architecture-toolbar-discovery.md`. `ROADMAP.md` was forward-looking work, which is `TODO.md`.
+
 ## [13.1.0] - Chat cards on the Blacksmith parts system
 
 ### Changed
