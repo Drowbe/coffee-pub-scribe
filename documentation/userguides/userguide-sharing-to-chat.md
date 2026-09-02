@@ -34,6 +34,8 @@ players as well as the GM, and it keeps working after someone reloads their brow
 
 Use this when you want the table looking at a picture rather than reading a description of it.
 
+![Chat cards from one narration block: the passage, a handout notice, and an illustration with its View Illustration button](../assets/scribe-illustration.webp)
+
 ## Choosing the colour
 
 All Scribe cards take their colour from the **Card Style** setting, which lists themes supplied by

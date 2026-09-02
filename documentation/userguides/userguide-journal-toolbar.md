@@ -48,6 +48,11 @@ the images appear.
 **Narration** posts the whole passage to chat as a card. See
 [Sharing to chat](userguide-sharing-to-chat.md).
 
+Below, the toolbar sits at the foot of the block with labels turned off, showing all five buttons in
+that order with Illustration hovered.
+
+![A narration block with the Scribe toolbar along its bottom edge](../assets/scribe-illustration.webp)
+
 ## Making the toolbar narrower
 
 Each button shows its name beside its icon by default. Turn off **Show Button Labels** in the

@@ -9,6 +9,8 @@
 Write a scene in a journal entry, and put it in front of your players with one click -- as a
 formatted card in the chat log, as a handout they can open later, or as a printable HTML file.
 
+![A journal page with a Scribe narration block, and the same passages posted as chat cards](documentation/assets/scribe-product.webp)
+
 ## What it does
 
 - **Turns a journal blockquote into a chat card.** Write the passage where you already keep your

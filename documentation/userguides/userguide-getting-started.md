@@ -30,6 +30,8 @@ exactly as they did before. If your journals contain no blockquotes yet, nothing
 **A button appears in the title bar of every journal window**, next to the close control, for opening
 the whole journal in a browser tab.
 
+![A journal page with a Scribe narration block on the left, and the passages posted as chat cards on the right](../assets/scribe-product.webp)
+
 ## Share your first passage
 
 1. Open a journal page and click Edit.

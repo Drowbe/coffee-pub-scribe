@@ -17,12 +17,11 @@ exits clean and the five publisher files still compare byte-identical to Blacksm
 section with Foundry open and correct what does not match. Verified when every instruction in all
 seven has been followed once. The specific claims most likely to be wrong, by guide:
 
-- `userguide-journal-toolbar.md` -- the left-to-right button order (Export, Copy, Handout,
-  Illustration, Narration) is the order the code appends them, which is not proof of the order they
-  render in. Also the claim that the toolbar reappears by itself after a page switch.
-- `userguide-writing-a-scene.md` -- that an image caption renders below the picture, that a Heading 4
-  below the first becomes a section break, and that a Heading 5 with no image beneath it does the
-  same. All three come from reading the composer, not from looking at a card.
+- `userguide-journal-toolbar.md` -- that the toolbar reappears by itself after a page switch. The
+  button order is confirmed by `assets/scribe-illustration.webp`.
+- `userguide-writing-a-scene.md` -- that a Heading 4 below the first becomes a section break, and
+  that a Heading 5 with no image beneath it does the same. Both come from reading the composer, not
+  from looking at a card. The caption position is confirmed by `assets/scribe-product.webp`.
 - `userguide-sharing-to-chat.md` -- everything about what a player sees, which was never observed
   from a player's client. Specifically that the View Illustration button works for a player and
   survives their browser reload.
@@ -33,10 +32,11 @@ seven has been followed once. The specific claims most likely to be wrong, by gu
   `scrubHTML` does to the cloned content; the resulting file has not been opened.
 - `userguide-settings.md` -- that no setting other than Card Style needs a reload.
 
-**Capture screenshots for the user guides and the README.** There are none, and no image is better
-than a stale one. Wanted: a journal blockquote showing the toolbar, a narration card in chat showing
-a title, an image caption and both kinds of dialogue line, an illustration card with its View
-Illustration button, and the settings pane. Save as WebP in `documentation/assets/` and link them relatively. Verified when the
+**Capture the two screenshots still missing.** `assets/scribe-product.webp` and
+`assets/scribe-illustration.webp` cover the journal block, the toolbar, a narration card, a handout
+notice and an illustration card. Still wanted: the settings pane, for `userguide-settings.md`, and a
+passage carrying six or more consecutive dialogue lines, for the question below. WebP, in
+`documentation/assets/`, linked relatively. Save as WebP in `documentation/assets/` and link them relatively. Verified when the
 images render in the repository and on the wiki.
 
 **Confirm the 13.1.0 chat cards in a live world.** The parts compositions have not been rendered in
@@ -45,11 +45,11 @@ Foundry. Steps are in `testing/journal-toolbar-and-cards.md`.
 ## Medium priority
 
 **Decide whether a conversation needs its own Blacksmith part.** Dialogue lines map to Blacksmith's
-`panel` part, which renders each as a dark box and writes a colon between the speaker and the line.
-A long conversation becomes a stack of dark boxes. Look at a real multi-line passage and, if it reads
-badly, ask Blacksmith for a dialogue part rather than adding a local class. Touches
-`composeDialoguePart` at `scripts/scribe.js:149`. Verified by eye on a passage with six or more
-spoken lines.
+`panel` part, which writes a colon between the speaker and the line. A single line renders as a light
+tinted inset rather than the heavy dark box this entry originally feared -- see
+`assets/scribe-illustration.webp` -- so the question is now only whether six or more in a row read as
+a conversation or as a stack. If they stack, ask Blacksmith for a dialogue part rather than adding a
+local class. Touches `composeDialoguePart` at `scripts/scribe.js:149`.
 
 **Verify the Font Awesome 6 codepoint in `styles/journals.css`.** The bookmark glyph `\f02e` was
 carried over from Font Awesome 5 and carries a comment saying it needs checking. Verified when the

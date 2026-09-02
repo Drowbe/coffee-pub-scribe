@@ -34,6 +34,10 @@ theme setting holds. Every item below is unproven.
 - [ ] The handout notice posts, its journal link opens the entry, and the full journal title is shown
       rather than truncated at 75 characters.
 - [ ] A blockquote with no Heading 4, and one with no content at all, are handled without error.
+- [ ] The narration card's header icon is the theatre masks the code names, and not the bookmark the
+      journal-side stylesheet uses for the same heading. The two are hard to tell apart at screenshot
+      resolution and the handout and illustration headers were both confirmed correct, so this is the
+      one header glyph still unchecked.
 
 ## Stylesheet consolidation, 13.1.0
 

@@ -66,6 +66,11 @@ A passage laid out like this:
 arrives as a card titled The Drowned Chapel, followed by the paragraph, the picture captioned The
 Altar, a divider, one spoken line and one unspoken one.
 
+Here a real passage is shown as written in the journal and as it arrives in chat. Note that the
+Heading 5 sits above the picture in the journal and becomes the caption beneath it on the card.
+
+![A narration block in a journal beside the chat cards it produced](../assets/scribe-product.webp)
+
 ## What carries across, and what does not
 
 **Your formatting survives.** Bold, italics, lists, tables and links to other Foundry documents all

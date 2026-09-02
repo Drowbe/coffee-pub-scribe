@@ -6,6 +6,8 @@ Scribe turns a passage written in a Foundry journal into something you can put i
 players: a formatted card in the chat log, a handout they can open later, or an HTML file you can
 keep. You write the scene in a blockquote, and Scribe adds a toolbar to it.
 
+![A journal page with a Scribe narration block, and the same passages posted as chat cards](assets/scribe-product.webp)
+
 It is part of the Coffee Pub suite and requires
 [Coffee Pub Blacksmith](https://github.com/Drowbe/coffee-pub-blacksmith), which supplies the chat
 card styling.

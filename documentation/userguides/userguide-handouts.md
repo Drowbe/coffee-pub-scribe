@@ -33,6 +33,10 @@ The card carries the name of the journal the passage came from as its title, a l
 handout and the folder it went to, and a link to the entry itself. The full journal name is shown
 however long it is.
 
+The middle card below is a handout announcement, filed in the Party Handouts folder.
+
+![A handout announcement card in chat, naming the new handout and its folder, with a link to the entry](../assets/scribe-illustration.webp)
+
 ## Permissions, and the thing to check
 
 **Creating a handout does not grant anyone permission to read it.** The entry is created and the link
