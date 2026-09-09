@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [unreleased] - Foundry v14 readiness
+
+### Fixed
+- **The illustration popup crashed on Foundry v14.** Foundry removed the un-namespaced global `mergeObject`, and `ImageFormApplication.defaultOptions` called it, so clicking View Illustration on a narration card threw `ReferenceError: mergeObject is not defined` before the window could open. `dialogue-illustration.js:18` now calls `foundry.utils.mergeObject`. This was the only defect in Scribe that Foundry v14 actually broke.
+- **The illustration sound would have crashed it a second time.** `AudioHelper` is removed on v14 as well, and `playSound()` runs before `form.render(true)`, so fixing `mergeObject` alone would have moved the same crash four lines down. `dialogue-illustration.js:94` now calls `foundry.audio.AudioHelper.play`. Both breaks sat on one code path, which is why the popup was the only feature to fail.
+
+### Changed
+- **The chat message hook uses its v13 name.** `renderChatMessage` was the v12 name; Blacksmith's HookManager silently remapped it to `renderChatMessageHTML` and warned once per session on the console. Registering the current name directly removes the warning and the remap. No behaviour changes — the callback already normalised jQuery to native DOM, so the v13 signature change was never a problem here.
+- **Journal page format constants are namespaced.** The four `CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML` references in `scribe.js` now read `foundry.CONST...`. This is not a v14 fix: bare `CONST` still resolves on 14.364. It is done ahead of the removal rather than after it.
+
+### Known
+- **What Foundry v14 removed, measured rather than assumed.** On 14.364, `typeof` reports `mergeObject`, `AudioHelper` and `duplicate` as `undefined`, and `CONST`, `Dialog`, `Application` and `FormApplication` as still present. A bare `CONST` read succeeds with no deprecation warning, and a V1 `Dialog` and a V1 `FormApplication` both still construct and render — the crash stack above shows Foundry's own `new Application` and `new FormApplication` executing before `defaultOptions` failed. So `ImageFormApplication` needs no port for v14, and the `Dialog` at `scribe.js:1115` is deprecated rather than broken. None of this is a promise about 14.4xx or v15; these globals are on their way out and the work is deferred, not avoided. See `documentation/TODO.md`.
+- **The fix has not been re-tested in a running world.** The crash was observed on released 13.1.1; the correction is in source and passes `node --check`, but the illustration popup has not been opened on v14 since. Reload Foundry and click View Illustration on a narration card before trusting it.
+
 ## [13.1.1]
 
 ### Changed

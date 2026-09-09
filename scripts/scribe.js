@@ -1256,7 +1256,7 @@ async function saveNarrationToJournal(message) {
         await journalEntry.createEmbeddedDocuments("JournalEntryPage", [{
             name: "Table of Contents",
             type: "text",
-            text: { content: tocContent, format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML }
+            text: { content: tocContent, format: foundry.CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML }
         }]);
         // Refresh the journal entry to ensure pages are populated
         journalEntry = game.journal.get(journalEntry.id);
@@ -1293,14 +1293,14 @@ async function saveNarrationToJournal(message) {
         await page.update({
             name: pageName,
             type: "text",
-            text: { content: message, format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML }
+            text: { content: message, format: foundry.CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML }
         });
         ui.notifications.info(`The page '${pageName}' has been updated in the journal '${entryName}'.`);
     } else {
         let createdPages = await journalEntry.createEmbeddedDocuments("JournalEntryPage", [{
             name: pageName,
             type: "text",
-            text: { content: message, format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML }
+            text: { content: message, format: foundry.CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML }
         }]);
         page = createdPages[0];
     }
@@ -1323,7 +1323,7 @@ async function saveNarrationToJournal(message) {
     await tocPage.update({
         text: {
             content: updatedTocContent,
-            format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML // Use the constant for the format
+            format: foundry.CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML // Use the constant for the format
         }
     });
 

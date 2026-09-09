@@ -15,7 +15,7 @@ export class ImageFormApplication extends FormApplication {
 
   /** Defaults options of the form application. */
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       id: "image-form",
       title: "Narrative Illustration",
       template: SCRIBE.DIALOGUE_ILLUSTRATION_TEMPLATE,
@@ -91,6 +91,6 @@ function playSound(strSound) {
   const strSoundPath = SCRIBE.PATH_SOUND + strSound + ".mp3";
   const strVolume = "0.7"
   if (strSoundPath) {
-      AudioHelper.play({ src: strSoundPath, volume: strVolume, autoplay: true, loop: false }, true);
+      foundry.audio.AudioHelper.play({ src: strSoundPath, volume: strVolume, autoplay: true, loop: false }, true);
   }
 }

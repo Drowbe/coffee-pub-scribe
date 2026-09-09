@@ -55,6 +55,32 @@ local class. Touches `composeDialoguePart` at `scripts/scribe.js:149`.
 carried over from Font Awesome 5 and carries a comment saying it needs checking. Verified when the
 intended icon renders in v13.
 
+**Re-anchor the journal toolbar and export button on `getHeaderControlsJournalEntrySheet`.** The
+three registrations of `renderJournalPageSheet` and `renderJournalSheet` at `scripts/scribe.js:340`,
+`:506` and `:547` are v12 hook names. Journal sheets became ApplicationV2 in v13, so none of them has
+fired since -- they register cleanly, return a hook id, log success, and never run. The features work
+anyway because three unconditional DOM fallbacks do the work instead: a `MutationObserver` on
+`document.body` at `:481`, a second one at `:610`, and `setInterval(checkJournalSheets, 2000)` at
+`:675`. That is a full-document `querySelectorAll` sweep every two seconds for the whole session,
+plus observer callbacks on every DOM mutation anywhere in Foundry, to place one titlebar button. The
+supported replacement is confirmed live on 14.364: Blacksmith's Journal Tools entry appears in the
+journal "..." menu through `getHeaderControlsJournalEntrySheet`, and the handler installs via
+`app.options.actions[action] ??=` because core has no handler for a module's own action name. Wait
+for Blacksmith's worked example -- it has six dead registrations across three files and is porting
+first. Verified when the export button and the blockquote toolbar still appear with all three
+observers and the interval deleted.
+
+**Namespace the remaining deprecated globals before they are removed.** `CONST` and `Dialog` still
+resolve on Foundry 14.364, so nothing is broken today, but both are on their way out and will fail
+with no further warning when they go. Scribe's exposure is one `new Dialog({...})` at
+`scripts/scribe.js:1115`, which wants `api.dialog` -- contract in Blacksmith's
+`documentation/api/api-dialog.md`. Suite-wide this is 62 `CONST` sites across eight modules and 19
+`Dialog` sites across five, so it wants doing together rather than per-module. When it happens, do
+the sites that carry a fallback first: patterns like `CONST?.X ?? {}` and `CONST.X ?? {}` read as
+already-migrated defensive code and are not -- neither `?.` nor `??` guards an undeclared identifier,
+only `typeof` does, so those throw exactly like a bare `CONST.X`. There are fifteen such sites in the
+suite and they are the ones an eyeball audit skips. Verified by grep, not by reading.
+
 **Remove the jQuery detection guards.** Every hook callback unwraps its `html` argument in case it is
 a jQuery object. Foundry v13 passes native elements, so once every call site is confirmed the guards
 can go. Touches `scripts/scribe.js`. Verified when the toolbar and the export button still appear
@@ -68,7 +94,15 @@ with the guards removed.
 blockquote by hand every time.
 
 **Consider ApplicationV2 for `ImageFormApplication`.** It extends `FormApplication`, which still
-works in v13. Optional, not required. Touches `scripts/dialogue-illustration.js`.
+constructs and renders on Foundry 14.364 -- confirmed from a crash stack showing Foundry's own
+`new Application` and `new FormApplication` executing. Optional, not required, and specifically not a
+v14 blocker. The target when it happens is `BlacksmithWindowBaseV2` from Blacksmith's
+`api/blacksmith-api.js` rather than a hand-rolled `HandlebarsApplicationMixin(ApplicationV2)`:
+`static get defaultOptions()` becomes `static DEFAULT_OPTIONS`, `template:` becomes `static PARTS`,
+and `getData()` keeps its name because the base class calls it. The `_render()` override at
+`dialogue-illustration.js:37` has no equivalent and simply deletes -- its body is an empty comment.
+Monarch's `TextReplacerApp` at `search-and-replace.js:15` is the suite's only other V1 Application
+and should be ported with the same pattern. Touches `scripts/dialogue-illustration.js`.
 
 ## Deferred
 
