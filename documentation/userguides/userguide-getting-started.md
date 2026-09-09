@@ -14,7 +14,7 @@ outside Foundry.
 
 ## What you need
 
-Foundry VTT version 13, and **Coffee Pub Blacksmith**, which is required. Scribe will not work
+Foundry VTT version 13 or 14, and **Coffee Pub Blacksmith**, which is required. Scribe will not work
 without it. Blacksmith also supplies the chat card styling, so the colour of your narration cards is
 chosen there rather than here.
 

@@ -63,9 +63,11 @@ the sheet classes; they have now been renamed to `renderJournalEntryPageSheet` a
 still in place: a `MutationObserver` on `document.body` at `:481`, a second at `:610`, and
 `setInterval(checkJournalSheets, 2000)` at `:675`. That is a full-document `querySelectorAll` sweep
 every two seconds for the whole session, plus observer callbacks on every DOM mutation anywhere in
-Foundry, to place one titlebar button. Deliberately left running until the rename is confirmed in a
-live world -- the idempotence guards mean hooks and observers can both fire without stacking
-toolbars, so this is safe as an overlap but wasteful as a permanent state. Remove them one at a time.
+Foundry, to place one titlebar button. The overlap is now measured rather than assumed safe: on
+14.367, across three page switches and three firings of the interval, the export button held at one
+and no blockquote carried more than one toolbar, so the idempotence guards at `:423` and `:764` do
+cover the hook path. Nothing is urgent; this is cost, not correctness. Remove them one at a time,
+starting with the two-second interval, which is the only one that runs when no journal is open.
 Verified when the export button and the blockquote toolbar still appear with all three deleted.
 
 **Namespace the remaining deprecated globals before they are removed.** `CONST` and `Dialog` still

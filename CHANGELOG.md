@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [unreleased] - Foundry v14 readiness
+## [14.0.0] - Foundry v14 readiness
 
 ### Fixed
 - **The illustration popup crashed on Foundry v14.** Foundry removed the un-namespaced global `mergeObject`, and `ImageFormApplication.defaultOptions` called it, so clicking View Illustration on a narration card threw `ReferenceError: mergeObject is not defined` before the window could open. `dialogue-illustration.js:18` now calls `foundry.utils.mergeObject`. This was the only defect in Scribe that Foundry v14 actually broke.
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Known
 - **What Foundry v14 removed, measured rather than assumed.** On 14.364, `typeof` reports `mergeObject`, `AudioHelper` and `duplicate` as `undefined`, and `CONST`, `Dialog`, `Application` and `FormApplication` as still present. A bare `CONST` read succeeds with no deprecation warning, and a V1 `Dialog` and a V1 `FormApplication` both still construct and render — the crash stack above shows Foundry's own `new Application` and `new FormApplication` executing before `defaultOptions` failed. So `ImageFormApplication` needs no port for v14, and the `Dialog` at `scribe.js:1115` is deprecated rather than broken. None of this is a promise about 14.4xx or v15; these globals are on their way out and the work is deferred, not avoided. See `documentation/TODO.md`.
-- **The fix has not been re-tested in a running world.** The crash was observed on released 13.1.1; the correction is in source and passes `node --check`, but the illustration popup has not been opened on v14 since. Reload Foundry and click View Illustration on a narration card before trusting it.
+- **Verified on a running Foundry 14.367 world**, after a cache-bypassing reload, rather than reasoned from source. The illustration popup opens with the title Narrative Illustration and its open-book sound is requested, so both the `mergeObject` and the `AudioHelper` correction are right -- the sound was checked separately by instrumenting `foundry.audio.AudioHelper.play` before the import, because `playSound()` runs first and a silent window would otherwise look like a pass. Opening a journal fires `renderJournalEntryPageSheet` and `renderJournalEntrySheet` and no legacy name. Across three page switches and enough idle for the two-second interval to fire three times, the export button held at one and no blockquote carried more than one toolbar, so the hook path and the DOM fallbacks coexist without stacking. A full reload logged no `"scribe-chat-message" registers the legacy hook` warning, which is the warning this release exists to remove. The pre-migration button path was checked separately, because it reaches the popup through `showDialogueFromImageButton` rather than through `showIllustration` directly: a detached button carrying `image-url` opens the window, one carrying `data-image-url` opens it, one carrying neither opens nothing -- and that third case is what makes the first two mean anything, since a function that opened a window regardless would pass the first two alone. The rendered window holds an `<img>` at the requested source. No pre-migration cards exist in the test world to click, so this was the only way to reach that path.
 
 ## [13.1.1]
 

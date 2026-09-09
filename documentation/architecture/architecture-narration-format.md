@@ -63,7 +63,10 @@ handler cannot travel with the card; this is why registration belongs at startup
 the post, and why the button still works after a browser refresh.
 
 Messages posted before version 13.1.0 carry a raw button with a `data-image-url` attribute instead.
-The `renderChatMessage` hook at `scripts/scribe.js:313` binds those, and exists only for them.
+The `renderChatMessageHTML` hook at `scripts/scribe.js:313` binds those, and exists only for them.
+That path was verified on Foundry 14.367 against a synthetic button rather than a real card, because
+no message old enough to carry a raw button remained in the test world: a button with `image-url`
+opens the popup, one with `data-image-url` opens it, and one with neither opens nothing.
 
 ## Theme
 

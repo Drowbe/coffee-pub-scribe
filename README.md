@@ -1,10 +1,11 @@
 # Coffee Pub Scribe
 
-![Foundry v13](https://img.shields.io/badge/foundry-v13-green)
 ![Latest Release](https://img.shields.io/github/v/release/Drowbe/coffee-pub-scribe)
-![MIT License](https://img.shields.io/badge/license-blue)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Drowbe/coffee-pub-scribe/release.yml)
 ![GitHub all releases](https://img.shields.io/github/downloads/Drowbe/coffee-pub-scribe/total)
+![Foundry v13](https://img.shields.io/badge/foundry-v13-yellow)
+![Foundry v14](https://img.shields.io/badge/foundry-v14-green)
+![MIT License](https://img.shields.io/badge/license-MIT-blue)
 
 Write a scene in a journal entry, and put it in front of your players with one click -- as a
 formatted card in the chat log, as a handout they can open later, or as a printable HTML file.
@@ -26,7 +27,7 @@ formatted card in the chat log, as a handout they can open later, or as a printa
 
 ## Requirements
 
-- **Foundry VTT v13.** Verified against v13; v12 is not supported.
+- **Foundry VTT v13 or v14.** Verified against both; v12 is not supported.
 - **[Coffee Pub Blacksmith](https://github.com/Drowbe/coffee-pub-blacksmith)** -- required. Scribe
   will not work without it, and it supplies the chat card styling.
 
