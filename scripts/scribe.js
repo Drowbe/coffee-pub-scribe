@@ -337,12 +337,12 @@ Hooks.on("ready", async () => {
 
     // Register journal page sheet hook
     const journalPageHookId = hookManager.registerHook({
-        name: 'renderJournalPageSheet',
+        name: 'renderJournalEntryPageSheet',
         description: 'SCRIBE: Add toolbar to journal page blockquotes',
         context: 'scribe-journal-toolbar',
         priority: 5,
         callback: (journalPageSheet, html, data) => {
-            console.log('SCRIBE: renderJournalPageSheet hook CALLED', { journalPageSheet, html, data });
+            console.log('SCRIBE: renderJournalEntryPageSheet hook CALLED', { journalPageSheet, html, data });
             // Check if the toolbarEnabled setting is true
             const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
             console.log('SCRIBE: toolbarEnabled =', toolbarEnabled);
@@ -501,9 +501,11 @@ Hooks.on("ready", async () => {
     // Check immediately for any existing journal sheets
     checkJournalSheetsForExport();
     
-    // Register journal sheet hook as fallback (may not fire in v13 due to ApplicationV2)
+    // v13 renamed this hook with the sheet class: JournalSheet became JournalEntrySheet under
+    // ApplicationV2, so `renderJournalSheet` stopped firing and the observers below carried the
+    // button instead. Verified firing on 14.367 by instrumenting Hooks.callAll.
     const journalSheetHookId = hookManager.registerHook({
-        name: 'renderJournalSheet',
+        name: 'renderJournalEntrySheet',
         description: 'SCRIBE: Add export button to journal titlebar',
         context: 'scribe-journal-export',
         priority: 5,
@@ -544,8 +546,8 @@ Hooks.on("ready", async () => {
     
     // Also register hooks directly with Foundry as fallback/test
     // This ensures hooks fire even if Blacksmith hook manager has issues
-    Hooks.on('renderJournalPageSheet', (journalPageSheet, html, data) => {
-        console.log('SCRIBE: Direct Foundry hook renderJournalPageSheet CALLED', { journalPageSheet, html, data });
+    Hooks.on('renderJournalEntryPageSheet', (journalPageSheet, html, data) => {
+        console.log('SCRIBE: Direct Foundry hook renderJournalEntryPageSheet CALLED', { journalPageSheet, html, data });
         // Check if the toolbarEnabled setting is true
         const toolbarEnabled = BlacksmithUtils.getSettingSafely(MODULE.ID, 'toolbarEnabled', true);
         if (!toolbarEnabled) return;

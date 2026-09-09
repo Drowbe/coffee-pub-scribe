@@ -55,20 +55,18 @@ local class. Touches `composeDialoguePart` at `scripts/scribe.js:149`.
 carried over from Font Awesome 5 and carries a comment saying it needs checking. Verified when the
 intended icon renders in v13.
 
-**Re-anchor the journal toolbar and export button on `getHeaderControlsJournalEntrySheet`.** The
-three registrations of `renderJournalPageSheet` and `renderJournalSheet` at `scripts/scribe.js:340`,
-`:506` and `:547` are v12 hook names. Journal sheets became ApplicationV2 in v13, so none of them has
-fired since -- they register cleanly, return a hook id, log success, and never run. The features work
-anyway because three unconditional DOM fallbacks do the work instead: a `MutationObserver` on
-`document.body` at `:481`, a second one at `:610`, and `setInterval(checkJournalSheets, 2000)` at
-`:675`. That is a full-document `querySelectorAll` sweep every two seconds for the whole session,
-plus observer callbacks on every DOM mutation anywhere in Foundry, to place one titlebar button. The
-supported replacement is confirmed live on 14.364: Blacksmith's Journal Tools entry appears in the
-journal "..." menu through `getHeaderControlsJournalEntrySheet`, and the handler installs via
-`app.options.actions[action] ??=` because core has no handler for a module's own action name. Wait
-for Blacksmith's worked example -- it has six dead registrations across three files and is porting
-first. Verified when the export button and the blockquote toolbar still appear with all three
-observers and the interval deleted.
+**Retire the journal DOM fallbacks now that the hooks fire again.** The three registrations at
+`scripts/scribe.js:340`, `:506` and `:547` carried v12 hook names and had not fired since v13 renamed
+the sheet classes; they have now been renamed to `renderJournalEntryPageSheet` and
+`renderJournalEntrySheet`, which Blacksmith verified firing on 14.367 by instrumenting
+`Hooks.callAll`. While they were dead, three unconditional DOM fallbacks did the work instead and are
+still in place: a `MutationObserver` on `document.body` at `:481`, a second at `:610`, and
+`setInterval(checkJournalSheets, 2000)` at `:675`. That is a full-document `querySelectorAll` sweep
+every two seconds for the whole session, plus observer callbacks on every DOM mutation anywhere in
+Foundry, to place one titlebar button. Deliberately left running until the rename is confirmed in a
+live world -- the idempotence guards mean hooks and observers can both fire without stacking
+toolbars, so this is safe as an overlap but wasteful as a permanent state. Remove them one at a time.
+Verified when the export button and the blockquote toolbar still appear with all three deleted.
 
 **Namespace the remaining deprecated globals before they are removed.** `CONST` and `Dialog` still
 resolve on Foundry 14.364, so nothing is broken today, but both are on their way out and will fail
