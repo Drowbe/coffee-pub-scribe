@@ -311,7 +311,7 @@ Hooks.on("ready", async () => {
     // posted now carry a registered action instead, which Blacksmith dispatches.
     // This keeps the ones already sitting in a world's chat log clickable.
     const chatHookId = hookManager.registerHook({
-        name: 'renderChatMessage',
+        name: 'renderChatMessageHTML',
         description: 'SCRIBE: Handle illustration buttons on pre-migration chat messages',
         context: 'scribe-chat-message',
         priority: 5,
