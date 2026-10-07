@@ -44,12 +44,11 @@
 }
 
 /* Narrative Title Icon */
-/* NOTE: Font-family should match Foundry's FA6 font. Inspect any Foundry icon in DevTools to get exact name */
+/* --fa-font-solid carries the solid family and weight 900. font-size must follow font, or the 1em inside the variable wins. */
 .journal-page-content blockquote h4::before {
-    font-family: "Font Awesome 6 Pro";
-    font-weight: 900;
-    content: "\f02e"; /* Bookmark icon - verify codepoint in FA6 */
+    font: var(--fa-font-solid);
     font-size: 0.85em;
+    content: "\f02e"; /* Bookmark icon */
     margin-top: 0px;
     margin-bottom: 0px;
     margin-left: 0px;
@@ -136,10 +135,9 @@
     border-radius: 0px;
 }
 .journal-page-content blockquote h6 strong::before {
-    font-family: "Font Awesome 6 Pro";
-    font-weight: 900;
-    content: "\f086";
+    font: var(--fa-font-solid);
     font-size: 0.9em;
+    content: "\f086";
     margin-top: 0px;
     margin-bottom: 0px;
     margin-left: 0px;
@@ -178,10 +176,9 @@
     border-radius: 0px;
 }
 .journal-page-content blockquote h6 em::before {
-    font-family: "Font Awesome 6 Pro";
-    font-weight: 900;
-    content: "\f4ad";
+    font: var(--fa-font-solid);
     font-size: 0.9em;
+    content: "\f4ad";
     margin-top: 0px;
     margin-bottom: 0px;
     margin-left: 0px;
