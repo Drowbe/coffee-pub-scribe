@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [14.0.1]
+
+### Fixed
+- **Four glyphs painted blank on Foundry v14.** From 14.359, Foundry ships Font Awesome Pro 7.2.0 and no longer defines the family `Font Awesome 6 Pro`. Four `::before` rules named that family with no fallback — the dialogue window title (`\f24d`), the narrative title bookmark (`\f02e`), the chat dialogue mark (`\f086`), and the inner-voice mark (`\f4ad`) — so the private-use characters had no font to draw from. The codepoints are unchanged and still live in `fa-solid-900.woff2`. Each rule now uses `font: var(--fa-font-solid)`, which Foundry defines as the solid face, with `font-size` declared after `font` so the `1em` inside the variable does not win.
+
 ## [14.0.0] - Foundry v14 readiness
 
 ### Fixed
 - **The illustration popup crashed on Foundry v14.** Foundry removed the un-namespaced global `mergeObject`, and `ImageFormApplication.defaultOptions` called it, so clicking View Illustration on a narration card threw `ReferenceError: mergeObject is not defined` before the window could open. `dialogue-illustration.js:18` now calls `foundry.utils.mergeObject`.
-- **Four glyphs painted blank on Foundry v14.** From 14.359, Foundry ships Font Awesome Pro 7.2.0 and no longer defines the family `Font Awesome 6 Pro`. Four `::before` rules named that family with no fallback — the dialogue window title (`\f24d`), the narrative title bookmark (`\f02e`), the chat dialogue mark (`\f086`), and the inner-voice mark (`\f4ad`) — so the private-use characters had no font to draw from. The codepoints are unchanged and still live in `fa-solid-900.woff2`. Each rule now uses `font: var(--fa-font-solid)`, which Foundry defines as the solid face, with `font-size` declared after `font` so the `1em` inside the variable does not win.
 - **The illustration sound would have crashed it a second time.** `AudioHelper` is removed on v14 as well, and `playSound()` runs before `form.render(true)`, so fixing `mergeObject` alone would have moved the same crash four lines down. `dialogue-illustration.js:94` now calls `foundry.audio.AudioHelper.play`. Both breaks sat on one code path, which is why the popup was the only feature to fail.
 
 ### Changed
