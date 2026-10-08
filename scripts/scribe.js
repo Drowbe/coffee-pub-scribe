@@ -1113,34 +1113,28 @@ async function resolveAllReferences(content) {
 // ** TOOLBAR: EXPORT NARRATIVE TO HTML   
 // ************************************
 async function exportNarrationToHTML() {
-    // v13: Use Dialog instead of prompt()
-    new Dialog({
-        title: "Export Journal to HTML",
+    // v15: DialogV2 wraps the content in its own <form>, so no inner <form> here.
+    await foundry.applications.api.DialogV2.wait({
+        window: { title: "Export Journal to HTML" },
+        position: { width: 400 },
         content: `
-            <form>
-                <div class="form-group">
-                    <label>Enter the name for the HTML file to be created:</label>
-                    <input type="text" id="filename-input" name="filename" placeholder="journal-export" style="width: 100%;">
-                </div>
-            </form>
+            <div class="form-group">
+                <label>Enter the name for the HTML file to be created:</label>
+                <input type="text" id="filename-input" name="filename" placeholder="journal-export" style="width: 100%;">
+            </div>
         `,
-        buttons: {
-            export: {
-                icon: '<i class="fa-solid fa-cloud-arrow-down"></i>',
+        buttons: [
+            {
+                action: "export",
+                icon: "fa-solid fa-cloud-arrow-down",
                 label: "Export",
-                callback: async (html) => {
-                    // v13: Detect and convert jQuery to native DOM if needed
-                    let nativeHtml = html;
-                    if (html && (html.jquery || typeof html.find === 'function')) {
-                        nativeHtml = html[0] || html.get?.(0) || html;
-                    }
-                    
-                    const filenameInput = nativeHtml.querySelector('#filename-input');
-                    const filename = filenameInput ? filenameInput.value.trim() : '';
-                    
+                default: true,
+                callback: async (event, button) => {
+                    const filename = button.form.elements.filename?.value.trim() ?? '';
+
                     if (!filename) {
                         ui.notifications.warn("Please enter a filename.");
-                        return false; // Keep dialog open
+                        return;
                     }
 
                     let divContent = document.querySelector('.journal-entry-page.text.level1');
@@ -1150,10 +1144,10 @@ async function exportNarrationToHTML() {
                     setTimeout(async () => {
                         // Call scrubHTML function to clean the HTML
                         clonedContent = scrubHTML(clonedContent);
-                        
+
                         // Recursively resolve UUID and Embed references
                         let resolvedContent = await resolveAllReferences(clonedContent.innerHTML);
-                        
+
                         let style = SCRIBE_HTML_EXPORT_CSS;
 
                         let htmlContent = '<html>\n<head>\n<title>' + filename + '</title>\n<style>' + style + '</style>\n</head>\n<body>\n' + resolvedContent + '\n</body>\n</html>';
@@ -1167,14 +1161,13 @@ async function exportNarrationToHTML() {
                     }, 0);
                 }
             },
-            cancel: {
-                icon: '<i class="fa-solid fa-times"></i>',
+            {
+                action: "cancel",
+                icon: "fa-solid fa-times",
                 label: "Cancel"
             }
-        },
-        default: "export",
-        close: () => {}
-    }).render(true);
+        ]
+    });
 }
 
 

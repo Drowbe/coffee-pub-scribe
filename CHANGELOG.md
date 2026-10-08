@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **The two remaining v1 Application globals are migrated ahead of their v15 removal.** `documentation/TODO.md` had already measured that neither one throws on v14 — this moves them anyway, since v15 drops the v1 classes entirely.
+  - `exportNarrationToHTML` (`scripts/scribe.js`) now opens `foundry.applications.api.DialogV2.wait(...)` instead of `new Dialog(...).render(true)`. The inner `<form>` is removed because `DialogV2` wraps its own, and the Export button callback reads the filename from `button.form.elements.filename` rather than a jQuery `html` argument. Behaviour is otherwise unchanged, including that the dialog closes after either button regardless of whether a filename was entered — that was already true of the v1 `Dialog` and is not something this change fixes.
+  - `ImageFormApplication` (`scripts/dialogue-illustration.js`) now extends Blacksmith's `BlacksmithWindowBaseV2` (`HandlebarsApplicationMixin(ApplicationV2)`) instead of `FormApplication`, per the target `documentation/TODO.md` already named. `static get defaultOptions()` becomes `static DEFAULT_OPTIONS`, and the window body renders through Blacksmith's shared `window-template.hbs` zone contract rather than a bespoke template root — `getData()` renders `templates/dialogue-illustration.hbs` itself into `bodyContent`, so the template file and its markup are unchanged. The empty `_render()` override is dropped, as `documentation/TODO.md` noted it had no `ApplicationV2` equivalent. `styles/dialogues.css` now targets `.window-title` without the `h4` tag qualifier, since `ApplicationV2`'s title element is not an `h4`.
+
+### Known
+- **Neither path has run inside Foundry.** Checked by reading Blacksmith's own `DialogV2` and `BlacksmithWindowBaseV2` consumers (`window-gmnotes.js`, `documentation/api/api-window.md`, `documentation/api/api-dialog.md`) for the current API shape, and by `node --check` on both edited scripts, but not by opening either dialog in a running world.
 
 ## [14.0.1]
 

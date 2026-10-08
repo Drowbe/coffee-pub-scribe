@@ -1,42 +1,49 @@
-// ================================================================== 
+// ==================================================================
 // ===== IMPORTS ====================================================
-// ================================================================== 
+// ==================================================================
 
 import {SCRIBE} from './const.js';
+import { BlacksmithWindowBaseV2 } from '/modules/coffee-pub-blacksmith/api/blacksmith-api.js';
 
-// ================================================================== 
+// ==================================================================
 // ===== EXPORTS ====================================================
-// ================================================================== 
+// ==================================================================
 
-export class ImageFormApplication extends FormApplication {
+export class ImageFormApplication extends BlacksmithWindowBaseV2 {
   constructor(object, options = {}) {
-    super(object, options);
+    super(options);
+    this.object = object;
   }
 
-  /** Defaults options of the form application. */
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
+  // Foundry already merges DEFAULT_OPTIONS across the whole prototype chain; copying
+  // super.DEFAULT_OPTIONS here would duplicate array entries such as window.controls.
+  static DEFAULT_OPTIONS = foundry.utils.mergeObject(
+    {},
+    {
       id: "image-form",
-      title: "Narrative Illustration",
-      template: SCRIBE.DIALOGUE_ILLUSTRATION_TEMPLATE,
-      width: 400,
-      height: "auto",
-      closeOnSubmit: true,
-      classes: ["window-app", "scribe-dialogue"]
-    });
-  }
+      classes: ["scribe-dialogue"],
+      position: { width: 400, height: "auto" },
+      window: { title: "Narrative Illustration", resizable: true }
+    }
+  );
+
+  static PARTS = {
+    body: { template: 'modules/coffee-pub-blacksmith/templates/window-template.hbs' }
+  };
 
   async getData() {
-    const data = super.getData();
-    const imageUrl = this.object.src;
-    data.strIllustration = imageUrl;
-    return data;
-  }
-
-  /** Override the render function to do some action after render if needed. */
-  async _render(force, options = {}) {
-    await super._render(force, options);
-    // Do some stuff after render if needed.
+    const bodyContent = await foundry.applications.handlebars.renderTemplate(
+      SCRIBE.DIALOGUE_ILLUSTRATION_TEMPLATE,
+      { strIllustration: this.object.src }
+    );
+    return {
+      appId: this.id,
+      showOptionBar: false,
+      showHeader: false,
+      showTools: false,
+      showActionBar: false,
+      bodyContent
+    };
   }
 }
 
@@ -61,9 +68,11 @@ export function showIllustration(imageUrl) {
   let img = new Image();
   img.onload = async function () {
     let options = {
-      width: Math.min(this.naturalWidth, window.innerWidth * 0.7),
-      height: Math.min(this.naturalHeight, window.innerHeight * 0.7),
-      resizable: true
+      position: {
+        width: Math.min(this.naturalWidth, window.innerWidth * 0.7),
+        height: Math.min(this.naturalHeight, window.innerHeight * 0.7)
+      },
+      window: { resizable: true }
     };
 
     const form = new ImageFormApplication(img, options);

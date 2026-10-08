@@ -15,10 +15,10 @@
     margin: 0;
   }
   
-  .scribe-dialogue .window-header h4.window-title {
-  
+  .scribe-dialogue .window-header .window-title {
+
   }
-  .scribe-dialogue .window-header h4.window-title::before {
+  .scribe-dialogue .window-header .window-title::before {
       font: var(--fa-font-solid);
       font-size: 0.8em;
       content: "\f24d";

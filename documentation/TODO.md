@@ -70,16 +70,15 @@ cover the hook path. Nothing is urgent; this is cost, not correctness. Remove th
 starting with the two-second interval, which is the only one that runs when no journal is open.
 Verified when the export button and the blockquote toolbar still appear with all three deleted.
 
-**Namespace the remaining deprecated globals before they are removed.** `CONST` and `Dialog` still
-resolve on Foundry 14.364, so nothing is broken today, but both are on their way out and will fail
-with no further warning when they go. Scribe's exposure is one `new Dialog({...})` at
-`scripts/scribe.js:1115`, which wants `api.dialog` -- contract in Blacksmith's
-`documentation/api/api-dialog.md`. Suite-wide this is 62 `CONST` sites across eight modules and 19
-`Dialog` sites across five, so it wants doing together rather than per-module. When it happens, do
-the sites that carry a fallback first: patterns like `CONST?.X ?? {}` and `CONST.X ?? {}` read as
-already-migrated defensive code and are not -- neither `?.` nor `??` guards an undeclared identifier,
-only `typeof` does, so those throw exactly like a bare `CONST.X`. There are fifteen such sites in the
-suite and they are the ones an eyeball audit skips. Verified by grep, not by reading.
+**Namespace the remaining deprecated `CONST` globals before they are removed.** `CONST` still
+resolves on Foundry 14.364, so nothing is broken today, but it is on its way out and will fail with
+no further warning when it goes. Suite-wide this is 62 `CONST` sites across eight modules, so it
+wants doing together rather than per-module. When it happens, do the sites that carry a fallback
+first: patterns like `CONST?.X ?? {}` and `CONST.X ?? {}` read as already-migrated defensive code and
+are not -- neither `?.` nor `??` guards an undeclared identifier, only `typeof` does, so those throw
+exactly like a bare `CONST.X`. There are fifteen such sites in the suite and they are the ones an
+eyeball audit skips. Verified by grep, not by reading. (Scribe's one `new Dialog({...})` at
+`scripts/scribe.js:1115` is now `DialogV2` -- see CHANGELOG.)
 
 **Remove the jQuery detection guards.** Every hook callback unwraps its `html` argument in case it is
 a jQuery object. Foundry v13 passes native elements, so once every call site is confirmed the guards
@@ -92,17 +91,6 @@ with the guards removed.
 
 **Add a way to insert a narration template into a journal page.** A GM writing a scene builds the
 blockquote by hand every time.
-
-**Consider ApplicationV2 for `ImageFormApplication`.** It extends `FormApplication`, which still
-constructs and renders on Foundry 14.364 -- confirmed from a crash stack showing Foundry's own
-`new Application` and `new FormApplication` executing. Optional, not required, and specifically not a
-v14 blocker. The target when it happens is `BlacksmithWindowBaseV2` from Blacksmith's
-`api/blacksmith-api.js` rather than a hand-rolled `HandlebarsApplicationMixin(ApplicationV2)`:
-`static get defaultOptions()` becomes `static DEFAULT_OPTIONS`, `template:` becomes `static PARTS`,
-and `getData()` keeps its name because the base class calls it. The `_render()` override at
-`dialogue-illustration.js:37` has no equivalent and simply deletes -- its body is an empty comment.
-Monarch's `TextReplacerApp` at `search-and-replace.js:15` is the suite's only other V1 Application
-and should be ported with the same pattern. Touches `scripts/dialogue-illustration.js`.
 
 ## Deferred
 
